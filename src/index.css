@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Print Styles */
+@media print {
+  /* Hide sidebar and navigation */
+  .print\\:hidden {
+    display: none !important;
+  }
+  
+  /* Hide sidebar */
+  aside,
+  nav,
+  [class*="sidebar"],
+  [class*="Sidebar"] {
+    display: none !important;
+  }
+  
+  /* Hide print button */
+  button[class*="print"],
+  .print-button {
+    display: none !important;
+  }
+  
+  /* Ensure full width for content */
+  body,
+  html {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* A4 page setup */
+  @page {
+    size: A4;
+    margin: 1cm;
+  }
+  
+  /* Proposal document styling for print */
+  .proposal-document {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    background: white;
+  }
+  
+  /* Prevent page breaks in tables */
+  table {
+    page-break-inside: avoid;
+  }
+  
+  /* Ensure sections don't break awkwardly */
+  section {
+    page-break-inside: avoid;
+  }
+  
+  /* Hide any overflow or scrollbars */
+  * {
+    overflow: visible !important;
+  }
+}
+
