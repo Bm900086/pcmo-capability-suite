@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capability Assessment Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></link>
+    <script type="module">
+        // --- START: Static Data & Configuration ---
+
+        // Strategic guidance for each category
+        const strategicGuidance = {
+            'Compute': 'Adopting VCF for Compute offers increased automation for workload placement and dynamic resource allocation, leading to improved scalability and performance.',
+            'Consumption & Services': 'Leveraging VCF for Consumption & Services streamlines the delivery of resources through integrated self-service portals and automated APIs, accelerating application deployment and lifecycle management.',
+            'Data Protection & Recovery': 'VCF provides integrated data protection capabilities, simplifying disaster recovery and business continuity plans and improving resilience against data loss or corruption.',
+            'Networking': 'Using VCF for Networks enables automated network provisioning, advanced security segmentation, and multi-site federation, leading to more resilient and agile network operations.',
+            'Operations': 'VCF\'s integrated operations management provides a unified view for monitoring, analytics, and automation, simplifying fleet management and improving overall operational efficiency and cost control.',
+            'Security Governance & Compliance': 'With VCF, security is integrated into the infrastructure, enabling automated policy enforcement, centralized identity management, and streamlined auditing and compliance.',
+            'Storage': 'VCF-enabled storage offers policy-based management and flexible scaling, allowing for independent growth of compute and storage resources and simplifying data encryption and management.',
+            'Operational Processes': 'VCF provides a framework for standardizing and automating operational processes, which can significantly reduce manual effort and improve overall efficiency.',
+            'Organizational Roles': 'VCF helps align organizational roles by providing a unified platform for teams, fostering collaboration and ensuring clear ownership and accountability.',
+            'Strategy': 'Adopting VCF can help a business-first IT strategy by providing the agility and scalability needed to quickly adapt to changing business priorities and goals.',
+            'Strategic Alignment': 'VCF provides a common platform that aligns IT capabilities directly with business goals, ensuring infrastructure strategy supports executive vision.',
+            'Team Capability': 'VCF simplifies complex cloud operations, allowing teams to upskill on a unified platform rather than managing disparate toolsets.',
+            'Operational Efficiency': 'VCF automates key operational processes, from deployment to lifecycle management, directly improving efficiency and reducing bottlenecks.',
+            'Platform Integration': 'VCF is a pre-integrated stack, eliminating the challenges of disconnected tools and providing a single, automated platform.',
+            'Governance Model': 'VCF enables "governance as code" by automating policy enforcement and compliance, balancing control with developer agility.'
+        };
+
+        // YouTube video links for each capability area
+        const youtubeLinks = {
+            'Compute': { url: 'https://www.youtube.com/watch?v=EewYz6YUNUY&ab_channel=VMwareCloudFoundation', title: 'Exploring VMware Cloud Foundation: VCF Compute', channel: 'VMware Cloud Foundation', length: '14m 8s' },
+            'Storage': { url: 'https://www.youtube.com/watch?v=vfIqmHc2-0g&ab_channel=VMwareCloudFoundation', title: 'VMware Cloud Foundation 5.0: A New Standard for Private Cloud', channel: 'VMware Cloud Foundation', length: '2m 29s' },
+            'Networking': { url: 'https://www.youtube.com/watch?v=eHVX1zVOdAA&ab_channel=VMwareCloudFoundation', title: 'VMware Cloud Foundation - Deploy Application Virtual Networks (AVNs)', channel: 'VMware Cloud Foundation', length: '3m 51s' },
+            'Operations': { url: 'https://www.youtube.com/watch?v=L7EepbHCARU&ab_channel=VMwareCloudFoundation', title: 'VMware Cloud Foundation Operations Overview', channel: 'VMware Cloud Foundation', length: '1m 48s' },
+            'Consumption & Services': { url: 'https://www.youtube.com/watch?v=2JKcTuWuq2M&ab_channel=VMwareCloudFoundation', title: 'Self-Service Private Cloud with VMware Cloud Foundation', channel: 'VMware Cloud Foundation', length: '2m 5s' },
+            'Security Governance & Compliance': { url: 'https://www.youtube.com/watch?v=tV30HfxHOEY&ab_channel=VMwareCloud', title: 'Platform Security within VMware Cloud Foundation', channel: 'VMware Cloud', length: '26m 0s' },
+            'Data Protection & Recovery': { url: 'https://www.youtube.com/watch?v=dC1H0vevXT0&ab_channel=VMwareCloudFoundation', title: 'VMware Live Recovery', channel: 'VMware Cloud Foundation', length: '3m 1s' },
+            'Strategic Alignment': { url: 'https://www.youtube.com/watch?v=FvFE4thEmqU&ab_channel=VMwareCloudFoundation', title: 'Fastest Path to VMware Cloud Foundation', channel: 'VMware Cloud Foundation', length: '12m 40s' },
+            'Team Capability': { url: 'https://www.youtube.com/watch?v=Y1DLurrtHaA&ab_channel=VMwareCloudFoundation', title: 'Exploring VMware Cloud Foundation: A Cloud Management Experience', channel: 'VMware Cloud Foundation', length: '14m 2s' },
+            'Operational Efficiency': { url: 'https://www.youtube.com/watch?v=cVop3DE-Na8&ab_channel=VMwareCloudFoundation', title: 'Boost Operational Efficiency with VMware Cloud Foundation', channel: 'VMware Cloud Foundation', length: '3m 22s' },
+            'Platform Integration': { url: 'https://www.youtube.com/watch?v=L7EepbHCARU&ab_channel=VMwareCloudFoundation', title: 'VMware Cloud Foundation Operations Overview', channel: 'VMware Cloud Foundation', length: '1m 48s' },
+            'Governance Model': { url: 'https://www.youtube.com/watch?v=tV30HfxHOEY&ab_channel=VMwareCloud', title: 'Platform Security within VMware Cloud Foundation', channel: 'VMware Cloud', length: '26m 0s' }
+        };
+
+        // VCF Toggle Titles
+        const VCF_TOGGLE_TITLES = {
+            'Compute': 'Using VCF Compute',
+            'Storage': 'Using VCF Storage',
+            'Networking': 'Using VCF Networking',
+            'Operations': 'Using VCF Operations',
+            'Consumption & Services': 'Using VCF Services',
+            'Security Governance & Compliance': 'Using VCF Security',
+            'Data Protection & Recovery': 'Using VCF Data Protection'
+        };
+
+        // Terminology and Color Maps
+        const STATUS_MAP = { 'unplanned': 'Unplanned', 'scheduled': 'Scheduled', 'ongoing': 'Ongoing', 'implemented': 'Implemented' };
+        const STATUS_COLORS = { 'unplanned': 'bg-gray-700 text-white', 'scheduled': 'bg-yellow-600 text-white', 'ongoing': 'bg-blue-600 text-white', 'implemented': 'bg-green-600 text-white' };
+        const STATUS_DEFAULT_COLORS = { 'unplanned': 'bg-white text-gray-700 hover:bg-gray-100', 'scheduled': 'bg-white text-gray-700 hover:bg-gray-100', 'ongoing': 'bg-white text-gray-700 hover:bg-gray-100', 'implemented': 'bg-white text-gray-700 hover:bg-gray-100' };
+
+        // Scoring Constants
+        const SCORE_MULTIPLIERS = { 'implemented': 1.0, 'ongoing': 0.7, 'scheduled': 0.3, 'unplanned': 0 };
+
+        // Static panel content for each assessment type
+        const panelContent = {
+            'Infrastructure Capabilities': { title: 'Infrastructure Assessment: The Strategic View', sections: [ { icon: 'fa-solid fa-lightbulb', heading: 'Why This Assessment Matters', content: ['Understand the importance of assessing capabilities.', 'Gain a clear perspective on your infrastructure\'s strengths and weaknesses.'], color: 'text-blue-500' }, { icon: 'fa-solid fa-money-check-dollar', heading: 'Impact on Metrics & Cost', content: ['See how gaps affect business efficiency, cost, and performance.', 'A mature infrastructure improves app deployment, security, and reduces operational costs.'], color: 'text-green-500' }, { icon: 'fa-solid fa-triangle-exclamation', heading: 'Key Challenges', content: ['Recognize common roadblocks organizations face.', 'Common issues include infrastructure silos, manual operations, and security gaps.'], color: 'text-red-500' }, { icon: 'fa-solid fa-rocket', heading: 'Strategic Advantage with VCF', content: ['Unlock agility, scalability, and cost optimization with VCF.', 'VCF provides a complete software-defined stack for simplified automation and consistent operations.'], color: 'text-purple-500' } ] },
+            'Operations and Process Capabilities': { title: 'Operations Assessment: The Strategic View', sections: [ { icon: 'fa-solid fa-lightbulb', heading: 'Why This Assessment Matters', content: ['Understand the importance of assessing capabilities.', 'Evaluate your operational maturity to improve organizational effectiveness.'], color: 'text-blue-500' }, { icon: 'fa-solid fa-money-check-dollar', heading: 'Impact on Metrics & Cost', content: ['See how gaps affect business efficiency, cost, and performance.', 'Mature operations lead to greater efficiency and better resource utilization.'], color: 'text-green-500' }, { icon: 'fa-solid fa-triangle-exclamation', heading: 'Key Challenges', content: ['Recognize common roadblocks organizations face.', 'Many struggle with manual processes, unclear roles, and misaligned IT goals.'], color: 'text-red-500' }, { icon: 'fa-solid fa-gears', heading: 'Strategic Advantage with VCF', content: ['Unlock agility, scalability, and cost optimization with VCF.', 'VCF automates operational tasks and fosters a product-led approach.'], color: 'text-purple-500' } ] },
+            'Cloud and App Strategy': { title: 'Cloud and App Strategy: The Strategic View', sections: [ { icon: 'fas fa-bullseye', heading: 'Understanding Your Priorities', content: ['Identify what drives your private and public cloud choices.', 'Pinpoint key events and workloads shaping your IT roadmap.'], color: 'text-blue-500' }, { icon: 'fas fa-cubes', heading: 'Gaining a Competitive Edge', content: ['Evaluate your containerization maturity.', 'See how a unified platform like VCF with Tanzu can streamline Kubernetes management.'], color: 'text-green-500' }, { icon: 'fas fa-exclamation-circle', heading: 'Translating Events into Action', content: ['Understand how mergers, cost cuts, or new app development can be addressed with an agile platform.', 'Learn how a flexible infrastructure can handle critical capacity changes.'], color: 'text-red-500' }, { icon: 'fas fa-shield-alt', heading: 'Protecting Critical Workloads', content: ['Recognize the importance of running regulated data in a secure, on-premises environment.', 'See how VCF is Implemented for mission-critical and sensitive workloads.'], color: 'text-purple-500' } ] },
+            'Priority Use Cases': { title: 'Strategic Importance of This Assessment', sections: [ { icon: 'fa-solid fa-lightbulb', heading: 'Strategic Importance', content: ["This assessment is more than a simple checklist; it's a strategic tool for identifying key priorities and aligning them with modern private cloud capabilities. By understanding your specific use cases, we can tailor a roadmap for success."], color: 'text-indigo-600' }, { icon: 'fa-solid fa-handshake', heading: 'Strengthening Partnerships', content: ["A clear, modern infrastructure strategy shows readiness to handle complex, mission-critical workloads, making you a more valuable partner."], color: 'text-green-600' }, { icon: 'fa-solid fa-chart-line', heading: 'Achieving Overall Success', content: ["Strategic adoption of a private cloud platform like VMware Cloud Foundation (VCF) enables agility, improved security, and operational efficiency, all of which are crucial for business growth."], color: 'text-blue-600' }, { icon: 'fa-solid fa-rocket', heading: 'Accelerating Innovation', content: ["The right platform reduces complexity, allowing your teams to focus on building new applications and driving innovation, rather than managing infrastructure."], color: 'text-purple-500' } ] }
+        };
+
+        // Data for all assessments
+        const assessmentData = {
+            'Infrastructure Capabilities': {
+                title: 'Infrastructure Capabilities', isVCFApplicable: true,
+                categories: {
+                    'Compute': [
+                        { statement: 'Fixed Compute Resources (vSphere w/o DRS)', score: 1 },
+                        { statement: 'High Availability (vSphere HA)', score: 2 },
+                        { statement: 'Automated Workload Load Balancing (vSphere DRS)', score: 2 },
+                        { statement: 'Resource Prioritization (vSphere Shares)', score: 1 },
+                        { statement: 'Scalable Compute (NVMe Tiering)', score: 2 },
+                        { statement: 'Hardware Acceleration (DirectPath I/O, vGPU, DPU)', score: 2 }
+                    ],
+                    'Storage': [
+                        { statement: 'Virtualized Storage (vSAN OSA or ESA)', score: 2 },
+                        { statement: 'Policy Based Management (VM Storage Policy)', score: 2 },
+                        { statement: 'Deduplication & Compression (vSAN Dedupe/Compression)', score: 2 },
+                        { statement: 'Fault Domains (vSAN Fault Domain / Stretched Cluster)', score: 1 },
+                        { statement: 'Flexible Scaling (vSAN Storage Cluster)', score: 2 },
+                        { statement: 'Data at Rest Encryption (vSAN Data at Rest Encryption)', score: 2 },
+                        { statement: 'File Services (vSAN File Services)', score: 2 },
+                        { statement: 'Workload Encryption (vSphere VM Encryption)', score: 2 }
+                    ],
+                    'Networking': [
+                        { statement: 'Virtualized Networks (VPC using vCenter)', score: 2 },
+                        { statement: 'Shared Services and Zone Segmentation (vDefend)', score: 2 },
+                        { statement: 'Load Balancing (AVI Load Balancing)', score: 1 },
+                        { statement: 'Advanced Virtualized Networking (Overlay)', score: 2 },
+                        { statement: 'Application and Tenant Segmentation (vDefend)', score: 2 },
+                        { statement: 'Stateful Services (VCF Networking / NSX)', score: 2 },
+                        { statement: 'Gateway Firewall (vDefend)', score: 2 },
+                        { statement: 'Multi-Tenancy (VPC using VCFA)', score: 2 },
+                        { statement: 'Networking for Modern Applications (VPC)', score: 2 },
+                        { statement: 'Multi-Site/ Federation (VCF Networking / NSX)', score: 2 },
+                        { statement: 'Global Policy Management (vDefend Firewall)', score: 1 }
+                    ],
+                    'Operations': [
+                        { statement: 'Capacity Management (VCF Operations)', score: 2 },
+                        { statement: 'Visibility (VCF Operations)', score: 2 },
+                        { statement: 'Analytics and Reporting (VCF Operations)', score: 1 },
+                        { statement: 'Cost Visibility (VCF Operations)', score: 2 },
+                        { statement: 'Fleet Management (VCF Operations)', score: 2 },
+                        { statement: 'Performance Optimization (VCF Operations)', score: 2 },
+                        { statement: 'Observability (VCF Operations)', score: 2 },
+                        { statement: 'Configuration Management (VCF Operations)', score: 2 },
+                        { statement: 'Chargeback (VCF Operations)', score: 2 }
+                    ],
+                    'Consumption & Services': [
+                        { statement: 'IaaS (VM Service)', score: 2 },
+                        { statement: 'CaaS (VKS)', score: 2 },
+                        { statement: 'API / CLI (VCF API / PowerCLI)', score: 2 },
+                        { statement: 'Self-Service Portal (VCF Automation)', score: 2 },
+                        { statement: 'Infra-as-Code (VCF Automation / Terraform / Ansible)', score: 2 },
+                        { statement: 'Data Services (Data Services Manager)', score: 2 },
+                        { statement: 'XaaS (VCF Automation Orchestrator)', score: 2 },
+                        { statement: 'PaaS (Tanzu Application Platform)', score: 2 },
+                        { statement: 'AI/ML Services (PAIS / PAIF)', score: 2 },
+                        { statement: 'CI/CD (Supervisor ArgoCD)', score: 2 },
+                        { statement: 'App Runtime Services (Tanzu Application Services)', score: 2 }
+                    ],
+                    'Security Governance & Compliance': [
+                        { statement: 'Identity and RBAC (VCF SSO)', score: 2 },
+                        { statement: 'Auditing and SIEM (Advanced Cyber Compliance AddOn)', score: 1 },
+                        { statement: 'Constraint Based Management (VCF Automation)', score: 2 },
+                        { statement: 'Compliance Enforcement (Salt / Advanced Cyber Compliance AddOn)', score: 2 },
+                        { statement: 'Data Governance (Advanced Cyber Compliance AddOn)', score: 2 }
+                    ],
+                    'Data Protection & Recovery': [
+                        { statement: 'Data Protection (vSAN Data Protection / VLR)', score: 2 },
+                        { statement: 'Disaster Avoidance (VLR)', score: 2 },
+                        { statement: 'Disaster Recovery (VLR)', score: 2 },
+                        { statement: 'Ransomware Recovery (VLR)', score: 1 }
+                    ]
+                },
+                categoryIcons: { 'Compute': 'fa-solid fa-microchip', 'Consumption & Services': 'fa-solid fa-cloud-arrow-up', 'Data Protection & Recovery': 'fa-solid fa-shield-virus', 'Networking': 'fa-solid fa-network-wired', 'Operations': 'fa-solid fa-gears', 'Security Governance & Compliance': 'fa-solid fa-lock', 'Storage': 'fa-solid fa-hard-drive' }
+            },
+            'Operations and Process Capabilities': {
+                title: 'Operations and Process Capabilities', isScored: true,
+                questions: [
+                    { id: 'sa', readinessArea: 'Strategic Alignment', questionText: "How is the customer's private cloud strategy aligned across their organization?", levels: { Unplanned: 'Strategy has not yet been defined or communicated beyond isolated efforts.', Scheduled: 'Strategy is defined primarily by IT leadership.', Ongoing: 'Strategy is formally documented and communicated across IT teams with clear ownership.', Implemented: 'Strategy is jointly owned by IT and business leadership with clear success metrics and regular executive review.' } },
+                    { id: 'tc', readinessArea: 'Team Capability', questionText: "How are the customer’s cloud platform skills distributed across their organization?", levels: { Unplanned: 'Cloud skills are largely absent or isolated without a formal training plan.', Scheduled: 'Skills are concentrated in a few key individuals.', Ongoing: 'Skills are documented and distributed across multiple team members with formal training programs in place.', Implemented: 'Skills are continuously developed with defined career paths, active knowledge sharing practices, and succession planning.' } },
+                    { id: 'oe', readinessArea: 'Operational Efficiency', questionText: "How does the customer’s operational processes enable their cloud consumption?", levels: { Unplanned: 'Processes are ad hoc and not standardized, leading to inconsistency.', Scheduled: 'Processes exist but often create bottlenecks for users.', Ongoing: 'Processes are documented and consistently followed with defined SLAs and ownership.', Implemented: 'Processes are automated where possible and continuously improved based on user feedback and performance metrics.' } },
+                    { id: 'pi', readinessArea: 'Platform Integration', questionText: "How integrated is the customer’s cloud platform stack?", levels: { Unplanned: 'Cloud tools and platforms are disconnected with no defined integration strategy.', Scheduled: 'Multiple tools and platforms with limited integration between them.', Ongoing: 'Integrated platform with documented APIs and standard interfaces across components.', Implemented: 'Fully automated platform with comprehensive self-service capabilities and integrated monitoring across all layers.' } },
+                    { id: 'gm', readinessArea: 'Governance Model', questionText: "How does the customer’s governance balance control with enablement?", levels: { Unplanned: 'Governance is informal or reactive, with minimal policy guidance.', Scheduled: 'Governance is focused primarily on control and compliance requirements.', Ongoing: 'Governance includes both control and enablement with documented policies and clear decision rights.', Implemented: 'Governance actively enables velocity with automated policy enforcement, clear escalation paths, and regular policy refinement.' } }
+                ]
+            },
+            'Cloud and App Strategy': {
+                title: 'Cloud and App Strategy', isVCFApplicable: false,
+                questions: {
+                    'q1': { title: "1. What are the customer's primary business goal(s) driving their cloud strategy?", icon: 'fas fa-cogs', type: 'checkbox', options: [ 'Better scalability', 'Business Transformation', 'Cloud ecosystem/Leverage unique cloud services', 'Cost savings', 'Governance & Compliance', 'IT Mandate', 'Reduce internal IT expenditure', 'Service Level Agreement (SLA)', 'Sovereignty', 'Speed/Agility', 'Other' ] },
+                    'q2': { title: '2. Which cloud provider(s) is the customer currently using for their business?', icon: 'fas fa-cloud', type: 'checkbox', options: [ 'Alibaba', 'Amazon Web Services (AWS)', 'Google Cloud Platform (GCP)', 'IBM', 'Managed Service Provider (MSP)', 'Microsoft Azure', 'On-Premise data center (non-VCF)', 'Oracle Cloud Infrastructure (OCI)', 'Third-Party Managed (BYOL Hyperscaler, VCD)', 'VCF On-Premise (self-managed)', 'Other' ] },
+                    'q3': { title: '3. What key business events or deadlines is the customer preparing for in the next 12 months?', icon: 'fas fa-calendar-alt', type: 'checkbox', options: [ 'App Modernization / Migration', 'Change in CxO', 'Critical Capacity Increase', 'Critical Cost Reduction', 'Data Center Evacuation / Lease Termination', 'Merger & Acquisition (M&A)', 'New App Development', 'Provider change / consolidation', 'Refresh data center/server', 'Remote Workforce – New or Expansion', 'Other' ] },
+                    'q4': { title: "4. What key challenges is the customer facing with the operations of their on-premise cloud environment?", icon: 'fas fa-exclamation-triangle', type: 'checkbox', options: [ 'High or unpredictable costs', 'Infrastructure and/or Operational silos', 'Need to accelerate speed of innovation (app dev)', 'Optimizing cloud capacity across environments', 'Security, regulatory compliance, and resiliency across environments', 'Visibility and observability across environments' ] },
+                    'q5a': { title: "5a. Which statement best describes and aligns with the customer's current data center strategy?", icon: 'fas fa-server', type: 'radio', options: [ 'Hybrid Cloud Strategy - Private Cloud Primary', 'Hybrid Cloud Strategy - Public Cloud Primary', 'Private Cloud First Strategy with limited public cloud deployments', 'Public Cloud First Strategy with decreasing private cloud deployments' ] },
+                    'q5b': { title: "5b. Which statement best describes and aligns with the customer's future data center strategy?", icon: 'fas fa-chart-line', type: 'radio', options: [ 'Hybrid Cloud Strategy - Private Cloud Primary', 'Hybrid Cloud Strategy - Public Cloud Primary', 'Private Cloud First Strategy with limited public cloud deployments', 'Public Cloud First Strategy with decreasing private cloud deployments' ] },
+                    'q6': { title: '6. What workloads is the customer currently running in their private cloud?', icon: 'fas fa-database', type: 'workload-matrix', workloads: [ 'AI/ML Workloads (e.g., training, inference, data processing)', 'Custom Applications (internally developed)', 'Data Analytics / Business Intelligence platforms', 'Databases (e.g., SQL, NoSQL, data warehouses)', 'Development & Test Environments', 'Edge Computing workloads', 'High-Performance Computing (HPC) / Scientific Computing', 'Highly Regulated/Sensitive Data Workloads (e.g., healthcare, financial data)', 'Traditional Enterprise Applications (e.g., ERP, CRM, HR systems)', 'Other' ], statuses: ['Yes', 'No', 'Does not apply', 'Planning to migrate to private cloud'] },
+                    'q7a': { title: "7a. What is the customer's organizational CI/CD pipeline strategy?", icon: 'fas fa-tasks', type: 'checkbox', options: [ 'Automated Testing', 'Feedback Loops', 'Infrastructure as Code', 'Pipeline as Code', 'Security Integration (DevSecOps)', 'Staged Deployments', 'Version Control', 'No current strategy' ] },
+                    'q7b': { title: "7b. What is the customer's organizational CI/CD pipeline tooling?", icon: 'fas fa-tools', type: 'checkbox', options: [ 'AWS CodePipeline / CodeBuild', 'Azure DevOps Pipelines', 'GitHub Actions', 'GitLab CI/CD', 'Jenkins', 'OpenShift Pipelines', 'Other' ] },
+                    'q8': { title: "8. What is the customer's organizational strategy for vendor container platforms?", icon: 'fas fa-box-open', type: 'checkbox', options: [ 'Amazon Elastic Kubernetes Service (EKS)', 'Azure Kubernetes Service (AKS)', 'Canonical Kubernetes (Ubuntu)', 'Docker', 'Google Kubernetes Engine (GKE)', 'Red Hat OpenShift Container Platform', 'SUSE Rancher', 'VMware Tanzu Application Platform (TAP)', 'VMware Kubernetes Service (VKS)', 'Does not have a container strategy', 'Other' ] }
+                }
+            },
+            'Priority Use Cases': {
+                title: 'Priority Use Cases', isVCFApplicable: false,
+                useCaseCategories: {
+                    "Infra Modernization": { icon: "fa-solid fa-cloud-arrow-down", useCases: [ { name: "Build and deploy private cloud infrastructure on-premises", icon: "fa-solid fa-building" }, { name: "Optimize infrastructure and operations", icon: "fa-solid fa-gauge-high" }, { name: "Extend data center to the edge, public and sovereign clouds", icon: "fa-solid fa-globe" } ] },
+                    "App Modernization": { icon: "fa-solid fa-cubes", useCases: [ { name: "Enable self-service infrastructure and cloud services for app teams", icon: "fa-solid fa-code" }, { name: "Build, run and manage Kubernetes and other modern apps", icon: "fa-solid fa-atom" }, { name: "Build, run and manage Private AI apps", icon: "fa-solid fa-brain" } ] },
+                    "Security Modernization": { icon: "fa-solid fa-shield-halved", useCases: [ { name: "Strengthen compliance and harden infrastructure", icon: "fa-solid fa-certificate" }, { name: "Bolster lateral security and intrusion prevention / detection", icon: "fa-solid fa-fingerprint" }, { name: "Accelerate recovery from ransomware and other disasters", icon: "fa-solid fa-file-waveform" } ] }
+                },
+                capabilityCategories: {
+                    "Priority Capabilities": { icon: "fa-solid fa-star", capabilities: [ { name: "Compute", icon: "fa-solid fa-microchip" }, { name: "Storage", icon: "fa-solid fa-hard-drive" }, { name: "Network", icon: "fa-solid fa-network-wired" }, { name: "Operations", icon: "fa-solid fa-gears" }, { name: "Consumption & Services", icon: "fa-solid fa-cloud-arrow-up" }, { name: "Security, Governance, & Compliance", icon: "fa-solid fa-lock" }, { name: "Data Protection & Recovery", icon: "fa-solid fa-shield-virus" } ] }
+                }
+            }
+        };
+        
+        // --- END: Static Data & Configuration ---
+
+
+        // --- START: Application State & Globals ---
+
+        // Application Status Enum
+        const APP_STATUS = { LANDING: 'landing', ASSESSMENT_INFRA: 'assessment', SURVEY_STRATEGY: 'survey', SURVEY_OPS: 'people-process-survey', USE_CASES: 'priority-use-cases', SUMMARY: 'final-summary' };
+        
+        // Centralized Application State (No userId needed)
+        const state = {
+            currentAssessmentKey: null,
+            currentSurveyQuestionIndex: 0,
+            appStatus: APP_STATUS.LANDING,
+            userChoices: { // Default state, resets on load
+                vcfStatus: {}, optedOut: {}, statements: {}, surveyB: {}, peopleProcess: {},
+                priorityUseCases: { rankedItems: [] }, priorityCapabilities: { rankedItems: [] }
+            }
+        };
+
+        // Assessment navigation flow
+        const assessmentJourney = [ 'Cloud and App Strategy', 'Infrastructure Capabilities', 'Operations and Process Capabilities', 'Priority Use Cases' ];
+
+        // Cache for DOM elements
+        const dom = { mainContent: null, assessmentTitle: null, scoreDisplay: null, goBackButton: null, loadingScreen: null, guidancePanel: null };
+        
+        // --- END: Application State & Globals ---
+
+
+        // --- START: Tailwind Configuration ---
+        tailwind.config = { theme: { extend: { fontFamily: { 'sans': ['Inter', 'sans-serif'] }, animation: { 'fade-in': 'fadeIn 0.5s ease-in-out', 'slide-in': 'slideIn 0.3s ease-out', 'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite', 'bounce-subtle': 'bounceSubtle 2s infinite', 'scale-in': 'scaleIn 0.2s ease-out', 'glow': 'glow 2s ease-in-out infinite alternate' }, keyframes: { fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }, slideIn: { '0%': { opacity: '0', transform: 'translateX(-20px)' }, '100%': { transform: 'translateX(0)' } }, bounceSubtle: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-5px)' } }, scaleIn: { '0%': { transform: 'scale(0.95)', opacity: '0' }, '100%': { transform: 'scale(1)', opacity: '1' } }, glow: { '0%': { boxShadow: '0 0 5px rgba(59, 130, 246, 0.5)' }, '100%': { boxShadow: '0 0 20px rgba(59, 130, 246, 0.8)' } } } } } }
+        // --- END: Tailwind Configuration ---
+
+
+        // --- START: Firebase & Data Handling (REMOVED) ---
+        // No initFirebase, loadUserData, or saveUserData functions needed
+
+
+        // --- START: Scoring & Calculation Helpers ---
+
+        const getNormalizedScoreAndStars = (currentScore, maxScore) => {
+            if (maxScore === 0) return { normalized: 0, stars: '<span class="text-gray-400">N/A</span>' };
+            const normalized = 1 + (4 * (currentScore / maxScore));
+            const rating = Math.round(normalized * 2) / 2;
+            let starsHtml = '';
+            for (let i = 1; i <= 5; i++) {
+                if (rating >= i) starsHtml += '<i class="fa-solid fa-star"></i>';
+                else if (rating === i - 0.5) starsHtml += '<i class="fa-solid fa-star-half-alt"></i>';
+                else starsHtml += '<i class="fa-regular fa-star"></i>';
+            }
+            return { normalized: normalized, stars: starsHtml };
+        };
+
+        const calculateInfraScore = () => {
+            const data = assessmentData['Infrastructure Capabilities'];
+            let totalCurrentScore = 0, totalMaxPossibleScore = 0;
+            for (const category in data.categories) {
+                if (state.userChoices.optedOut[category]) continue;
+                data.categories[category].forEach(stmt => {
+                    totalMaxPossibleScore += stmt.score;
+                    const status = state.userChoices.statements[`${category}-${stmt.statement}`] || 'unplanned';
+                    const score = stmt.score * (SCORE_MULTIPLIERS[status] || 0);
+                    totalCurrentScore += (state.userChoices.vcfStatus[category] !== false) ? score : score / 2;
+                });
+            }
+            const { normalized } = getNormalizedScoreAndStars(totalCurrentScore, totalMaxPossibleScore);
+            return { normalizedScoreText: totalMaxPossibleScore > 0 ? `${normalized.toFixed(1)}/5` : 'N/A', rawScore: totalCurrentScore, maxScore: totalMaxPossibleScore };
+        };
+
+        const calculateOpsScore = () => {
+            const data = assessmentData['Operations and Process Capabilities'];
+            if (!data.isScored) return { rawScore: 0, maxScore: 0 };
+            let currentScore = 0;
+            const maxScorePerQuestion = 20; // Max score for each question
+            const maxScore = data.questions.length * maxScorePerQuestion;
+            data.questions.forEach(q => {
+                const choice = state.userChoices.peopleProcess[q.id] || 'unplanned'; // Use lowercase
+                currentScore += maxScorePerQuestion * (SCORE_MULTIPLIERS[choice] || 0);
+            });
+            return { rawScore: currentScore, maxScore: maxScore };
+        };
+
+        const formatRadarLabel = (label, maxLength = 15) => {
+            const words = label.split(' ');
+            if (words.length < 2) return label;
+            let lines = [], currentLine = words[0];
+            for (let i = 1; i < words.length; i++) {
+                const word = words[i];
+                if (currentLine.length + word.length + 1 <= maxLength) currentLine += ' ' + word;
+                else { lines.push(currentLine); currentLine = word; }
+            }
+            lines.push(currentLine);
+            return lines;
+        };
+        
+        // --- END: Scoring & Calculation Helpers ---
+
+
+        // --- START: Navigation Helpers ---
+
+        const getNavigationButtons = (currentAssessmentKey) => {
+            const currentJourneyIndex = assessmentJourney.indexOf(currentAssessmentKey);
+            let navButtonHtml = '';
+            if (currentJourneyIndex < assessmentJourney.length - 1) {
+                const nextAssessmentKey = assessmentJourney[currentJourneyIndex + 1];
+                const nextData = assessmentData[nextAssessmentKey];
+                let nextAssessmentType = nextData.questions && !nextData.isScored ? APP_STATUS.SURVEY_STRATEGY : (nextData.useCaseCategories ? APP_STATUS.USE_CASES : (nextData.questions && nextData.isScored ? APP_STATUS.SURVEY_OPS : APP_STATUS.ASSESSMENT_INFRA));
+                const nextAssessmentTitle = nextData.title.split(':')[0];
+                navButtonHtml = `<button data-next-assessment="${nextAssessmentKey}" data-next-type="${nextAssessmentType}" class="next-step-btn group bg-blue-600 text-white px-6 py-3 font-medium rounded-md hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">Next Step: ${nextAssessmentTitle} <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform duration-300"></i></button>`;
+            } else {
+                navButtonHtml = `<button id="view-summary-btn" class="group bg-green-600 text-white px-6 py-3 font-medium rounded-md hover:bg-green-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl">View Final Summary <i class="fa-solid fa-flag-checkered ml-2"></i></button>`;
+            }
+            return `<div class="my-8 flex justify-end">${navButtonHtml}</div>`;
+        };
+
+        const attachNavigationListeners = () => {
+            document.querySelectorAll('.next-step-btn').forEach(b => b.addEventListener('click', e => {
+                const btn = e.currentTarget;
+                state.currentAssessmentKey = btn.dataset.nextAssessment;
+                state.appStatus = btn.dataset.nextType;
+                if (state.appStatus === APP_STATUS.SURVEY_STRATEGY) state.currentSurveyQuestionIndex = 0;
+                renderApp();
+            }));
+            const summaryBtn = document.getElementById('view-summary-btn');
+            if (summaryBtn) summaryBtn.addEventListener('click', () => { state.appStatus = APP_STATUS.SUMMARY; renderApp(); });
+        };
+
+        // --- END: Navigation Helpers ---
+
+
+        // --- START: Main Rendering Functions ---
+
+        const renderGuidancePanel = (assessmentKey) => {
+            const panelData = panelContent[assessmentKey];
+            if (!panelData) { dom.guidancePanel.classList.add('hidden'); return; }
+            dom.guidancePanel.classList.remove('hidden');
+            let panelHtml = `<div class="animate-fade-in"><div class="text-center mb-6"><div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 mb-4 rounded-full shadow-lg animate-pulse-slow"><i class="fa-solid fa-lightbulb text-white text-2xl"></i></div><h3 class="text-2xl font-bold text-gray-800">${panelData.title}</h3></div>${panelData.sections.map((section, index) => `<div class="mb-6 bg-white p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 animate-slide-in" style="animation-delay: ${index * 0.1}s"><div class="flex items-start space-x-4"><div class="flex-shrink-0"><div class="w-12 h-12 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center rounded-full"><i class="${section.icon} text-xl ${section.color}"></i></div></div><div class="flex-grow"><h4 class="text-lg font-semibold text-gray-800 mb-3">${section.heading}</h4><ul class="text-gray-600 text-sm leading-relaxed space-y-2">${section.content.map(point => `<li class="flex items-start space-x-2"><i class="fa-solid fa-check-circle ${section.color} mt-0.5 flex-shrink-0"></i><span>${point}</span></li>`).join('')}</ul></div></div></div>`).join('')}</div>`;
+            dom.guidancePanel.innerHTML = panelHtml;
+        };
+
+        const renderApp = () => {
+            dom.mainContent.innerHTML = '';
+            dom.scoreDisplay.innerHTML = '';
+            dom.scoreDisplay.classList.add('hidden');
+            dom.assessmentTitle.textContent = '';
+            dom.guidancePanel.classList.add('hidden');
+            if (state.appStatus === APP_STATUS.LANDING) { dom.goBackButton.classList.add('hidden'); renderLandingPage(); }
+            else {
+                dom.goBackButton.classList.remove('hidden');
+                if (state.appStatus === APP_STATUS.ASSESSMENT_INFRA) renderAssessment(state.currentAssessmentKey);
+                else if (state.appStatus === APP_STATUS.SURVEY_STRATEGY) renderCloudStrategySurvey();
+                else if (state.appStatus === APP_STATUS.SURVEY_OPS) renderPeopleProcessSurvey();
+                else if (state.appStatus === APP_STATUS.USE_CASES) renderPriorityUseCases();
+                else if (state.appStatus === APP_STATUS.SUMMARY) renderFinalSummary();
+            }
+            dom.loadingScreen.classList.add('hidden');
+        };
+
+        const renderLandingPage = () => {
+            dom.assessmentTitle.textContent = 'PCMO Cloud Maturity Model';
+            dom.mainContent.innerHTML = `<div class="text-center mb-12 animate-fade-in"><div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 mb-6 rounded-full shadow-lg animate-bounce-subtle"><i class="fa-solid fa-route text-white text-4xl"></i></div><h2 class="text-3xl font-bold text-gray-800">Your Assessment Journey</h2><p class="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed mt-4">Follow the path below to get a complete picture of your organization's capabilities, starting with your high-level strategy.</p></div><div class="mt-8"><div class="flex flex-col md:flex-row items-stretch justify-center gap-8 md:gap-4"><div class="flex-1 group animate-fade-in" style="animation-delay: 0.1s"><button id="start-journey-btn" class="journey-tile text-center w-full h-full p-8 bg-gradient-to-br from-indigo-500 to-purple-700 text-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex flex-col items-center"><i class="fa-solid fa-cloud-arrow-up text-4xl mb-4"></i><span class="text-sm font-bold opacity-80 mb-2 block">STEP 1</span><h3 class="text-2xl font-bold mb-2">Start Assessment Journey</h3><p class="opacity-90 flex-grow">Begin by defining your Cloud and App Strategy to set the foundation.</p></button></div><div class="flex-shrink-0 items-center justify-center hidden md:flex animate-fade-in" style="animation-delay: 0.2s"><i class="fa-solid fa-arrow-right-long text-gray-400 text-4xl"></i></div><div class="flex-1 group animate-fade-in" style="animation-delay: 0.3s"><button id="infra-btn" class="journey-tile text-center w-full h-full p-8 bg-white rounded-lg shadow-lg hover:shadow-xl hover:border-blue-500 border-2 border-transparent transition-all duration-300 transform hover:scale-105 flex flex-col items-center"><i class="fa-solid fa-laptop-code text-4xl mb-4 text-gray-700"></i><span class="text-sm font-bold text-gray-500 mb-2 block">STEP 2</span><h3 class="text-2xl font-bold text-gray-800 mb-2">Infrastructure Capabilities</h3><p class="text-gray-600 flex-grow">Dive deep into the technical capabilities of your infrastructure.</p></button></div><div class="flex-shrink-0 items-center justify-center hidden md:flex animate-fade-in" style="animation-delay: 0.4s"><i class="fa-solid fa-arrow-right-long text-gray-400 text-4xl"></i></div><div class="flex-1 group animate-fade-in" style="animation-delay: 0.5s"><button id="ops-btn" class="journey-tile text-center w-full h-full p-8 bg-white rounded-lg shadow-lg hover:shadow-xl hover:border-blue-500 border-2 border-transparent transition-all duration-300 transform hover:scale-105 flex flex-col items-center"><i class="fa-solid fa-diagram-project text-4xl mb-4 text-gray-700"></i><span class="text-sm font-bold text-gray-500 mb-2 block">STEP 3</span><h3 class="text-2xl font-bold text-gray-800 mb-2">Operations and Process Capabilities</h3><p class="text-gray-600 flex-grow">Evaluate the maturity of your operational processes and teams.</p></button></div><div class="flex-shrink-0 items-center justify-center hidden md:flex animate-fade-in" style="animation-delay: 0.6s"><i class="fa-solid fa-arrow-right-long text-gray-400 text-4xl"></i></div><div class="flex-1 group animate-fade-in" style="animation-delay: 0.7s"><button id="use-cases-btn" class="journey-tile text-center w-full h-full p-8 bg-white rounded-lg shadow-lg hover:shadow-xl hover:border-blue-500 border-2 border-transparent transition-all duration-300 transform hover:scale-105 flex flex-col items-center"><i class="fa-solid fa-list-check text-4xl mb-4 text-gray-700"></i><span class="text-sm font-bold text-gray-500 mb-2 block">STEP 4</span><h3 class="text-2xl font-bold text-gray-800 mb-2">Priority Use Cases</h3><p class="text-gray-600 flex-grow">Identify and prioritize key modernization use cases.</p></button></div></div></div>`;
+            document.getElementById('start-journey-btn').addEventListener('click', () => { state.currentAssessmentKey = 'Cloud and App Strategy'; state.appStatus = APP_STATUS.SURVEY_STRATEGY; renderApp(); });
+            document.getElementById('infra-btn').addEventListener('click', () => { state.currentAssessmentKey = 'Infrastructure Capabilities'; state.appStatus = APP_STATUS.ASSESSMENT_INFRA; renderApp(); });
+            document.getElementById('ops-btn').addEventListener('click', () => { state.currentAssessmentKey = 'Operations and Process Capabilities'; state.appStatus = APP_STATUS.SURVEY_OPS; renderApp(); });
+            document.getElementById('use-cases-btn').addEventListener('click', () => { state.currentAssessmentKey = 'Priority Use Cases'; state.appStatus = APP_TATUS.USE_CASES; renderApp(); });
+        };
+
+        const renderAssessment = (assessmentKey) => {
+            const data = assessmentData[assessmentKey];
+            dom.assessmentTitle.textContent = data.title;
+            dom.scoreDisplay.classList.remove('hidden');
+            renderGuidancePanel(assessmentKey);
+            const { rawScore, maxScore } = calculateInfraScore();
+            const overallRawScoreText = `${rawScore.toFixed(0)}/${maxScore}`;
+            const navContainerHtml = getNavigationButtons(assessmentKey);
+            dom.scoreDisplay.innerHTML = `<div class="bg-white/90 backdrop-blur-sm p-6 shadow-xl animate-fade-in"><div class="flex items-center justify-center"><div class="text-center"><div class="text-sm text-gray-500 mb-1">Overall Raw Score (Max: ${maxScore})</div><span id="overall-normalized-score" class="font-bold text-3xl text-blue-600">${overallRawScoreText}</span></div></div></div>${navContainerHtml}`;
+            let htmlContent = '', categoryIndex = 0;
+            for (const category in data.categories) {
+                const statements = data.categories[category];
+                const isIncluded = state.userChoices.optedOut[category] === undefined ? true : !state.userChoices.optedOut[category];
+                const categoryId = category.replace(/\s/g, '-');
+                const vcfEnabled = state.userChoices.vcfStatus[category] === undefined ? true : state.userChoices.vcfStatus[category];
+                const showVCFToggle = data.isVCFApplicable, categoryIcon = data.categoryIcons[category];
+                let categoryCurrentScore = 0, maxCategoryScore = 0;
+                statements.forEach(stmt => { maxCategoryScore += stmt.score; const statementKey = `${category}-${stmt.statement}`; const status = state.userChoices.statements[statementKey] || 'unplanned'; const statementScore = stmt.score * (SCORE_MULTIPLIERS[status] || 0); if (isIncluded) categoryCurrentScore += vcfEnabled ? statementScore : statementScore / 2; });
+                const { normalized } = getNormalizedScoreAndStars(categoryCurrentScore, maxCategoryScore);
+                const categoryRawScoreText = maxCategoryScore > 0 ? `${categoryCurrentScore.toFixed(0)}/${maxCategoryScore}` : 'N/A';
+                let statementsHtml = `<div class="space-y-4">${statements.map((stmt, index) => { const statementKey = `${category}-${stmt.statement}`; const currentStatus = state.userChoices.statements[statementKey] || 'unplanned'; const phaseColors = { 'Scheduled': 'bg-yellow-100 text-yellow-800 border-yellow-200', 'Ongoing': 'bg-blue-100 text-blue-800 border-blue-200', 'Implemented': 'bg-green-100 text-green-800 border-green-200' }; const isInfraMatrix = assessmentKey === 'Infrastructure Capabilities'; const phaseTag = isInfraMatrix ? '' : `<span class="flex-shrink-0 inline-flex items-center px-3 py-1 text-xs font-medium border rounded-full ${phaseColors[stmt.phase] || 'bg-gray-100 text-gray-800 border-gray-200'}">${stmt.phase}</span>`; const spaceClass = isInfraMatrix ? 'space-x-2' : 'space-x-4'; return `<div class="statement-card flex flex-col md:flex-row md:items-center justify-between p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-lg hover:border-blue-200 transition-all duration-300 ${!isIncluded ? 'opacity-50 grayscale pointer-events-none' : ''} animate-slide-in" style="animation-delay: ${index * 0.05}s"><div class="flex items-start ${spaceClass} flex-grow mb-4 md:mb-0 md:pr-4">${phaseTag}<p class="text-gray-900 font-medium leading-relaxed">${stmt.statement}</p></div><div class="flex-shrink-0 w-full sm:w-auto"><div class="segmented-control flex w-full rounded-md overflow-hidden border border-gray-300 shadow-sm"><button data-status="unplanned" data-statement-key="${statementKey}" class="btn-status flex-1 px-2 py-2 text-xs font-medium transition-colors duration-200 ${currentStatus === 'unplanned' ? STATUS_COLORS['unplanned'] : STATUS_DEFAULT_COLORS['unplanned']}">${STATUS_MAP['unplanned']}</button><button data-status="scheduled" data-statement-key="${statementKey}" class="btn-status flex-1 px-2 py-2 text-xs font-medium transition-colors duration-200 ${currentStatus === 'scheduled' ? STATUS_COLORS['scheduled'] : STATUS_DEFAULT_COLORS['scheduled']}">${STATUS_MAP['scheduled']}</button><button data-status="ongoing" data-statement-key="${statementKey}" class="btn-status flex-1 px-2 py-2 text-xs font-medium transition-colors duration-200 ${currentStatus === 'ongoing' ? STATUS_COLORS['ongoing'] : STATUS_DEFAULT_COLORS['ongoing']}">${STATUS_MAP['ongoing']}</button><button data-status="implemented" data-statement-key="${statementKey}" class="btn-status flex-1 px-2 py-2 text-xs font-medium transition-colors duration-200 ${currentStatus === 'implemented' ? STATUS_COLORS['implemented'] : STATUS_DEFAULT_COLORS['implemented']}">${STATUS_MAP['implemented']}</button></div></div></div>`; }).join('')}</div>`;
+                htmlContent += `<div class="mb-12 animate-fade-in" style="animation-delay: ${categoryIndex * 0.1}s"><div class="flex items-center mb-6"><div class="flex-grow h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div><div class="px-4"><div class="w-3 h-3 bg-blue-500 rounded-full"></div></div><div class="flex-grow h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div></div><div class="bg-gradient-to-r from-white/90 to-gray-50/90 p-6 shadow-lg mb-6 border-l-4 border-indigo-500 rounded-lg hover:shadow-xl transition-all duration-300"><div class="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0"><div class="flex items-center space-x-4"><div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg"><i class="${categoryIcon} text-2xl text-white"></i></div><div><h2 class="text-2xl font-bold text-gray-800">${category}</h2><div class="text-sm text-gray-500 mt-1">${statements.length} capabilities to assess</div></div></div><div class="flex items-center space-x-3 sm:space-x-6"><div class="text-center relative group"><div class="flex items-center space-x-2"><span class="font-bold text-xl text-blue-600">${categoryRawScoreText}</span></div><button class="info-btn text-gray-400 hover:text-blue-600 transition-all duration-300 mt-1"><i class="fa-solid fa-info-circle"></i></button><div class="tooltip absolute top-full mt-2 right-0 w-72 p-4 bg-gray-900 text-white text-xs shadow-2xl hidden group-hover:block z-10 rounded-lg"><div class="absolute top-0 right-1/2 transform translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-b-8 border-gray-900 -mt-2"></div><p class="mb-2">This is the raw calculated score for the <strong>${category}</strong> category out of a maximum of ${maxCategoryScore.toFixed(0)}.</p><p>This raw score contributes to the overall 0-100 rating for the Infrastructure Assessment.</p></div></div><div class="flex items-center space-x-3">${showVCFToggle ? `<label class="flex items-center space-x-3 cursor-pointer group"><span class="text-sm text-gray-600 group-hover:text-gray-800 transition-colors font-medium">${VCF_TOGGLE_TITLES[category] || 'Using VCF'}</span><div class="relative"><input type="checkbox" id="vcf-toggle-${categoryId}" data-category="${category}" class="sr-only vcf-toggle-checkbox" ${vcfEnabled ? 'checked' : ''}><div class="block w-12 h-7 rounded-full transition-all duration-300 ${vcfEnabled ? 'bg-gradient-to-r from-green-400 to-green-600 shadow-lg animate-glow' : 'bg-gray-400'}"></div><div class="dot absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-all duration-300 transform shadow-md ${vcfEnabled ? 'translate-x-5' : ''}"></div></div></label>` : ''}</div></div></div><div class="mb-6 ${vcfEnabled ? 'hidden' : ''} bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-400 text-yellow-800 p-6 rounded-md shadow-md animate-slide-in" role="alert"><div class="flex items-start space-x-3"><i class="fa-solid fa-exclamation-triangle text-yellow-600 text-xl mt-1"></i><div><p class="font-bold mb-2">Strategic Disadvantage Detected</p><p class="text-sm leading-relaxed">${strategicGuidance[category]}</p></div></div></div>${statementsHtml}</div>`;
+                categoryIndex++;
+            }
+            htmlContent += navContainerHtml;
+            dom.mainContent.innerHTML = htmlContent;
+            dom.mainContent.querySelectorAll('.btn-status').forEach(b => b.addEventListener('click', e => { state.userChoices.statements[e.currentTarget.dataset.statementKey] = e.currentTarget.dataset.status; renderAssessment(assessmentKey); })); // Removed saveUserData()
+            dom.mainContent.querySelectorAll('.vcf-toggle-checkbox').forEach(c => c.addEventListener('change', e => { const cat = e.target.dataset.category; state.userChoices.vcfStatus[cat] = e.target.checked; renderAssessment(assessmentKey); })); // Removed saveUserData()
+            attachNavigationListeners();
+        };
+
+        const renderPeopleProcessSurvey = () => {
+            const data = assessmentData[state.currentAssessmentKey];
+            dom.assessmentTitle.textContent = data.title;
+            renderGuidancePanel(state.currentAssessmentKey);
+            const { rawScore: currentScore, maxScore } = calculateOpsScore();
+            const rawScoreText = `${currentScore.toFixed(0)}/${maxScore}`;
+            
+            // Score Tooltip Info
+            const maxScorePerQuestion = 20;
+            const scoreUnplanned = (maxScorePerQuestion * (SCORE_MULTIPLIERS.unplanned || 0)).toFixed(0);
+            const scoreScheduled = (maxScorePerQuestion * (SCORE_MULTIPLIERS.scheduled || 0)).toFixed(0);
+            const scoreOngoing = (maxScorePerQuestion * (SCORE_MULTIPLIERS.ongoing || 0)).toFixed(0);
+            const scoreImplemented = (maxScorePerQuestion * (SCORE_MULTIPLIERS.implemented || 0)).toFixed(0);
+
+            const infoIcon = (tooltipText) => `<span class="relative group inline-block ml-1"><i class="fa-solid fa-info-circle text-gray-400 hover:text-blue-600 cursor-pointer text-xs"></i><div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-2 bg-gray-800 text-white text-xs rounded-md shadow-lg hidden group-hover:block z-10">${tooltipText}<div class="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-800"></div></div></span>`;
+            
+            // Overall Score Display (similar to Infra)
+            dom.scoreDisplay.classList.remove('hidden');
+            const navContainerHtml = getNavigationButtons(state.currentAssessmentKey);
+            dom.scoreDisplay.innerHTML = `<div class="bg-white/90 backdrop-blur-sm p-6 shadow-xl animate-fade-in"><div class="flex items-center justify-center"><div class="text-center"><div class="text-sm text-gray-500 mb-1 flex items-center justify-center">Overall Raw Score (Max: ${maxScore})${infoIcon(`Score is based on maturity (Unplanned=${scoreUnplanned}, Scheduled=${scoreScheduled}, Ongoing=${scoreOngoing}, Implemented=${scoreImplemented}). Max total score is ${maxScore}.`)}</div><span id="overall-normalized-score" class="font-bold text-3xl text-blue-600">${rawScoreText}</span></div></div></div>${navContainerHtml}`;
+
+            let htmlContent = '', categoryIndex = 0;
+
+            data.questions.forEach((q) => {
+                const currentChoice = state.userChoices.peopleProcess[q.id] || 'unplanned';
+                const maxQuestionScore = maxScorePerQuestion; // 20
+                const questionCurrentScore = maxQuestionScore * (SCORE_MULTIPLIERS[currentChoice] || 0);
+                const categoryRawScoreText = `${questionCurrentScore.toFixed(0)}/${maxQuestionScore}`;
+                const categoryId = q.id;
+
+                // Description Box HTML (aligned left)
+                let descriptionHtml = `<div class="p-4 space-y-3 bg-gray-50 rounded-lg border border-gray-200 text-left">`;
+                const maturityLevels = ['Unplanned', 'Scheduled', 'Ongoing', 'Implemented'];
+                maturityLevels.forEach(level => {
+                    const statusKey = level.toLowerCase();
+                    //const colorClass = statusKey === 'unplanned' ? 'text-gray-600' : (statusKey === 'scheduled' ? 'text-yellow-600' : (statusKey === 'ongoing' ? //'text-blue-600' : 'text-green-600'));
+                    const colorClass = 'text-gray-700';
+
+
+
+                    descriptionHtml += `<div class="text-sm ${colorClass} leading-snug"><strong>${STATUS_MAP[statusKey]}:</strong> ${q.levels[level]}</div>`;
+                });
+                descriptionHtml += `</div>`;
+
+                // Main Category Block
+                htmlContent += `<div class="mb-12 animate-fade-in" style="animation-delay: ${categoryIndex * 0.1}s"><div class="flex items-center mb-6"><div class="flex-grow h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div><div class="px-4"><div class="w-3 h-3 bg-blue-500 rounded-full"></div></div><div class="flex-grow h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div></div><div class="bg-gradient-to-r from-white/90 to-gray-50/90 p-6 shadow-lg mb-6 border-l-4 border-indigo-500 rounded-lg hover:shadow-xl transition-all duration-300"><div class="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0"><div class="flex items-center space-x-4"><div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg"><i class="fa-solid fa-diagram-project text-2xl text-white"></i></div><div><h2 class="text-2xl font-bold text-gray-800">${q.readinessArea}</h2><div class="text-sm text-gray-500 mt-1">${q.questionText}</div></div></div><div class="flex items-center space-x-3 sm:space-x-6"><div class="text-center relative group"><div class="flex items-center space-x-2"><span class="font-bold text-xl text-blue-600">${categoryRawScoreText}</span></div><button class="info-btn text-gray-400 hover:text-blue-600 transition-all duration-300 mt-1"><i class="fa-solid fa-info-circle"></i></button><div class="tooltip absolute top-full mt-2 right-0 w-72 p-4 bg-gray-900 text-white text-xs shadow-2xl hidden group-hover:block z-10 rounded-lg"><div class="absolute top-0 right-1/2 transform translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-b-8 border-gray-900 -mt-2"></div><p class="mb-2">This is the raw calculated score for the <strong>${q.readinessArea}</strong> readiness area out of a maximum of ${maxQuestionScore}.</p><p>This raw score contributes to the overall 0-100 rating for the Operations Assessment.</p></div></div></div></div></div>
+                
+                
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
+    <div class="md:col-span-3">
+        <h3 class="text-lg font-bold text-gray-700 mb-3">Maturity Level Descriptions:</h3>
+        ${descriptionHtml}
+    </div>
+    <div class="flex flex-col items-center justify-start md:col-span-2">
+                
+                <h3 class="text-lg font-bold text-gray-700 mb-3">Choose Current Maturity Level:</h3><div class="segmented-control flex w-full rounded-md overflow-hidden border border-gray-300 shadow-sm"><button data-status="unplanned" data-question-id="${q.id}" class="btn-ops-status flex-1 px-2 py-2 text-xs font-medium transition-colors duration-200 ${currentChoice === 'unplanned' ? STATUS_COLORS['unplanned'] : STATUS_DEFAULT_COLORS['unplanned']}">${STATUS_MAP['unplanned']}</button><button data-status="scheduled" data-question-id="${q.id}" class="btn-ops-status flex-1 px-2 py-2 text-xs font-medium transition-colors duration-200 ${currentChoice === 'scheduled' ? STATUS_COLORS['scheduled'] : STATUS_DEFAULT_COLORS['scheduled']}">${STATUS_MAP['scheduled']}</button><button data-status="ongoing" data-question-id="${q.id}" class="btn-ops-status flex-1 px-2 py-2 text-xs font-medium transition-colors duration-200 ${currentChoice === 'ongoing' ? STATUS_COLORS['ongoing'] : STATUS_DEFAULT_COLORS['ongoing']}">${STATUS_MAP['ongoing']}</button><button data-status="implemented" data-question-id="${q.id}" class="btn-ops-status flex-1 px-2 py-2 text-xs font-medium transition-colors duration-200 ${currentChoice === 'implemented' ? STATUS_COLORS['implemented'] : STATUS_DEFAULT_COLORS['implemented']}">${STATUS_MAP['implemented']}</button></div></div></div></div>`;
+                categoryIndex++;
+            });
+            
+            htmlContent += navContainerHtml;
+            dom.mainContent.innerHTML = htmlContent;
+
+            // Add event listener for the new status buttons
+            dom.mainContent.querySelectorAll('.btn-ops-status').forEach(b => b.addEventListener('click', e => {
+                state.userChoices.peopleProcess[e.currentTarget.dataset.questionId] = e.currentTarget.dataset.status;
+                renderPeopleProcessSurvey();
+            }));
+
+            attachNavigationListeners();
+        };
+
+        const renderPriorityUseCases = () => {
+            const data = assessmentData[state.currentAssessmentKey];
+            dom.assessmentTitle.textContent = data.title;
+            renderGuidancePanel(state.currentAssessmentKey);
+            // Use Cases Data Prep
+            if (!state.userChoices.priorityUseCases || !state.userChoices.priorityUseCases.rankedItems) state.userChoices.priorityUseCases = { rankedItems: [] };
+            const rankedUseCasesSet = new Set(state.userChoices.priorityUseCases.rankedItems);
+            let leftColumnUseCasesHtml = '';
+            for (const categoryName in data.useCaseCategories) {
+                const categoryData = data.useCaseCategories[categoryName];
+                leftColumnUseCasesHtml += `<div class="mb-6"><div class="flex items-center mb-3"><i class="${categoryData.icon} mr-3 text-indigo-600 text-xl"></i><h3 class="text-xl font-semibold text-gray-800">${categoryName}</h3></div><div class="space-y-3 pl-8">`;
+                categoryData.useCases.forEach(useCase => { const isChecked = rankedUseCasesSet.has(useCase.name); leftColumnUseCasesHtml += `<label class="flex items-center p-3 bg-white border rounded-md shadow-sm hover:bg-gray-50 cursor-pointer transition-all"><input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 priority-checkbox-usecase" data-id="${useCase.name}" ${isChecked ? 'checked' : ''}><i class="${useCase.icon} mx-3 text-gray-600"></i><span class="text-sm font-medium text-gray-800">${useCase.name}</span></label>`; });
+                leftColumnUseCasesHtml += `</div></div>`;
+            }
+            let rightColumnUseCasesHtml = '';
+            state.userChoices.priorityUseCases.rankedItems.forEach((itemName, index) => { let useCase = null; for (const categoryName in data.useCaseCategories) { useCase = data.useCaseCategories[categoryName].useCases.find(uc => uc.name === itemName); if (useCase) break; } if (useCase) rightColumnUseCasesHtml += `<div class="use-case-item flex items-center p-3 bg-white border rounded-lg shadow-md" data-id="${useCase.name}"><i class="fa-solid fa-grip-vertical item-drag-handle cursor-grab text-gray-400 mr-4"></i><span class="inline-flex items-center justify-center w-6 h-6 mr-3 text-white bg-indigo-600 rounded-full text-xs font-bold flex-shrink-0">${index + 1}</span><i class="${useCase.icon} mr-3 text-gray-600"></i><span class="text-sm font-medium text-gray-800">${useCase.name}</span></div>`; });
+
+            // Capabilities Data Prep
+            if (!state.userChoices.priorityCapabilities || !state.userChoices.priorityCapabilities.rankedItems) state.userChoices.priorityCapabilities = { rankedItems: [] };
+            const rankedCapabilitiesSet = new Set(state.userChoices.priorityCapabilities.rankedItems);
+            let leftColumnCapabilitiesHtml = '';
+            for (const categoryName in data.capabilityCategories) {
+                const categoryData = data.capabilityCategories[categoryName];
+                leftColumnCapabilitiesHtml += `<div class="mb-6"><div class="flex items-center mb-3"><i class="${categoryData.icon} mr-3 text-indigo-600 text-xl"></i><h3 class="text-xl font-semibold text-gray-800">${categoryName}</h3></div><div class="space-y-3 pl-8">`;
+                categoryData.capabilities.forEach(capability => { const isChecked = rankedCapabilitiesSet.has(capability.name); leftColumnCapabilitiesHtml += `<label class="flex items-center p-3 bg-white border rounded-md shadow-sm hover:bg-gray-50 cursor-pointer transition-all"><input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 priority-checkbox-capability" data-id="${capability.name}" ${isChecked ? 'checked' : ''}><i class="${capability.icon} mx-3 text-gray-600"></i><span class="text-sm font-medium text-gray-800">${capability.name}</span></label>`; });
+                leftColumnCapabilitiesHtml += `</div></div>`;
+            }
+            let rightColumnCapabilitiesHtml = '';
+            state.userChoices.priorityCapabilities.rankedItems.forEach((itemName, index) => { let capability = null; for (const categoryName in data.capabilityCategories) { capability = data.capabilityCategories[categoryName].capabilities.find(uc => uc.name === itemName); if (capability) break; } if (capability) rightColumnCapabilitiesHtml += `<div class="capability-item flex items-center p-3 bg-white border rounded-lg shadow-md" data-id="${capability.name}"><i class="fa-solid fa-grip-vertical item-drag-handle cursor-grab text-gray-400 mr-4"></i><span class="inline-flex items-center justify-center w-6 h-6 mr-3 text-white bg-indigo-600 rounded-full text-xs font-bold flex-shrink-0">${index + 1}</span><i class="${capability.icon} mr-3 text-gray-600"></i><span class="text-sm font-medium text-gray-800">${capability.name}</span></div>`; });
+
+            dom.mainContent.innerHTML = `<div class="animate-fade-in space-y-12"><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div><h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">Available Use Cases</h2><p class="text-center text-gray-600 mb-6">Select use cases to prioritize.</p><div id="static-use-cases" class="space-y-4 p-4 bg-gray-50 rounded-lg border">${leftColumnUseCasesHtml}</div></div><div><h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">Your Priorities (Ranked Use Cases)</h2><p class="text-center text-gray-600 mb-6">Drag and drop to rank your selected items.</p><div id="prioritized-list-usecases" class="space-y-3 p-4 bg-gray-50 rounded-lg border min-h-[300px]">${rightColumnUseCasesHtml}${rightColumnUseCasesHtml.length === 0 ? '<div id="empty-state-usecase" class="text-center text-gray-500 p-8">Select items from the left to start prioritizing.</div>' : ''}</div></div></div><div class="border-t-2 border-gray-200 border-dashed my-12"></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div><h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">Available Capabilities</h2><p class="text-center text-gray-600 mb-6">Select capabilities to prioritize.</p><div id="static-capabilities" class="space-y-4 p-4 bg-gray-50 rounded-lg border">${leftColumnCapabilitiesHtml}</div></div><div><h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">Your Priorities (Ranked Capabilities)</h2><p class="text-center text-gray-600 mb-6">Drag and drop to rank your selected items.</p><div id="prioritized-list-capabilities" class="space-y-3 p-4 bg-gray-50 rounded-lg border min-h-[300px]">${rightColumnCapabilitiesHtml}${rightColumnCapabilitiesHtml.length === 0 ? '<div id="empty-state-capability" class="text-center text-gray-500 p-8">Select items from the left to start prioritizing.</div>' : ''}</div></div></div><div class="flex justify-center mt-8">${getNavigationButtons(state.currentAssessmentKey)}</div></div>`;
+            
+            // Init Sortable & Listeners for Use Cases
+            const prioritizedListUseCases = document.getElementById('prioritized-list-usecases');
+            new Sortable(prioritizedListUseCases, { animation: 150, handle: '.item-drag-handle', ghostClass: 'sortable-ghost', onEnd: (evt) => { const newOrder = Array.from(evt.to.children).filter(el => el.dataset.id).map(el => el.dataset.id); state.userChoices.priorityUseCases.rankedItems = newOrder; renderPriorityUseCases(); } }); // Removed saveUserData()
+            document.querySelectorAll('.priority-checkbox-usecase').forEach(checkbox => checkbox.addEventListener('change', (e) => { const id = e.target.dataset.id, isChecked = e.target.checked; if (isChecked) { if (!state.userChoices.priorityUseCases.rankedItems.includes(id)) state.userChoices.priorityUseCases.rankedItems.push(id); } else state.userChoices.priorityUseCases.rankedItems = state.userChoices.priorityUseCases.rankedItems.filter(item => item !== id); renderPriorityUseCases(); })); // Removed saveUserData()
+
+            // Init Sortable & Listeners for Capabilities
+            const prioritizedListCapabilities = document.getElementById('prioritized-list-capabilities');
+            new Sortable(prioritizedListCapabilities, { animation: 150, handle: '.item-drag-handle', ghostClass: 'sortable-ghost', onEnd: (evt) => { const newOrder = Array.from(evt.to.children).filter(el => el.dataset.id).map(el => el.dataset.id); state.userChoices.priorityCapabilities.rankedItems = newOrder; renderPriorityUseCases(); } }); // Removed saveUserData()
+            document.querySelectorAll('.priority-checkbox-capability').forEach(checkbox => checkbox.addEventListener('change', (e) => { const id = e.target.dataset.id, isChecked = e.target.checked; if (isChecked) { if (!state.userChoices.priorityCapabilities.rankedItems.includes(id)) state.userChoices.priorityCapabilities.rankedItems.push(id); } else state.userChoices.priorityCapabilities.rankedItems = state.userChoices.priorityCapabilities.rankedItems.filter(item => item !== id); renderPriorityUseCases(); })); // Removed saveUserData()
+            
+            attachNavigationListeners();
+        };
+
+        const renderFinalSummary = () => {
+            dom.assessmentTitle.textContent = "PCMO Cloud Maturity Model Assessment Summary";
+            dom.guidancePanel.classList.add('hidden');
+            const { rawScore: infraCurrentScore, maxScore: infraMaxScore } = calculateInfraScore();
+            const { rawScore: opsCurrentScore, maxScore: opsMaxScore } = calculateOpsScore();
+            const totalMaxScore = 200, totalCurrentScore = infraCurrentScore + opsCurrentScore;
+            const overallAverageScore = (totalCurrentScore / totalMaxScore) * 100;
+            const { normalized } = getNormalizedScoreAndStars(overallAverageScore, 100);
+            const overallRawScoreText = overallAverageScore.toFixed(0);
+            const infraRawScoreText = infraMaxScore > 0 ? `${infraCurrentScore.toFixed(0)}/${infraMaxScore}` : 'N/A';
+            const opsRawScoreText = opsMaxScore > 0 ? `${opsCurrentScore.toFixed(0)}/${opsMaxScore}` : 'N/A';
+            
+            // Chart Data Calc
+            const infraData = assessmentData['Infrastructure Capabilities'], opsData = assessmentData['Operations and Process Capabilities'];
+            const infraChartLabels = [], infraChartData = [];
+            for (const category in infraData.categories) { if (state.userChoices.optedOut[category]) continue; infraChartLabels.push(formatRadarLabel(category)); let categoryCurrentScore = 0, categoryMaxScore = 0; infraData.categories[category].forEach(stmt => { categoryMaxScore += stmt.score; const status = state.userChoices.statements[`${category}-${stmt.statement}`] || 'unplanned'; const score = stmt.score * (SCORE_MULTIPLIERS[status] || 0); categoryCurrentScore += (state.userChoices.vcfStatus[category] !== false) ? score : score / 2; }); const { normalized: catNormalized } = getNormalizedScoreAndStars(categoryCurrentScore, categoryMaxScore); infraChartData.push(catNormalized); }
+            const opsChartLabels = [], opsChartData = [];
+            if(opsData.isScored) { 
+                const maxPointsPerArea = 20; // Use the same max score as in calculateOpsScore
+                opsData.questions.forEach(q => { 
+                    opsChartLabels.push(formatRadarLabel(q.readinessArea)); 
+                    const choice = state.userChoices.peopleProcess[q.id] || 'unplanned';
+                    const current = maxPointsPerArea * (SCORE_MULTIPLIERS[choice] || 0);
+                    const normalizedAreaScore = 1 + (4 * (current / maxPointsPerArea)); 
+                    const finalChartScore = normalizedAreaScore; // VCF logic removed
+                    opsChartData.push(finalChartScore); 
+                }); 
+            }
+            
+            let useCasesSummaryListHtml = '<ol class="list-decimal list-inside space-y-3 text-gray-700">';
+            const priorities = state.userChoices.priorityUseCases;
+            if (priorities.rankedItems && priorities.rankedItems.length > 0) priorities.rankedItems.forEach(itemName => useCasesSummaryListHtml += `<li class="text-gray-800 font-medium">${itemName}</li>`); else useCasesSummaryListHtml = '<p class="text-center text-gray-500">No use cases were prioritized.</p>'; useCasesSummaryListHtml += '</ol>';
+            let capabilitiesSummaryListHtml = '<ol class="list-decimal list-inside space-y-3 text-gray-700">';
+            const capabilities = state.userChoices.priorityCapabilities;
+            if (capabilities.rankedItems && capabilities.rankedItems.length > 0) capabilities.rankedItems.forEach(itemName => capabilitiesSummaryListHtml += `<li class="text-gray-800 font-medium">${itemName}</li>`); else capabilitiesSummaryListHtml = '<p class="text-center text-gray-500">No capabilities were prioritized.</p>'; capabilitiesSummaryListHtml += '</ol>';
+            
+            const insightsHtml = generateFinalInsights({ infraCurrentScore, infraMaxScore, opsCurrentScore, opsMaxScore, choices: state.userChoices });
+            const vcfWarningHtml = generateVCFWarningBlock(state.userChoices);
+            const infoIcon = (tooltipText) => `<span class="relative group inline-block ml-2"><i class="fa-solid fa-info-circle text-gray-400 hover:text-blue-600 cursor-pointer"></i><div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-2 bg-gray-800 text-white text-xs rounded-md shadow-lg hidden group-hover:block z-10">${tooltipText}<div class="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-800"></div></div></span>`;
+            
+            const summaryHtml = `<div class="animate-fade-in space-y-12"><div><h2 class="text-3xl font-bold text-center text-gray-800 mb-6">Overall Maturity Rating</h2><div class="bg-white/90 backdrop-blur-sm p-6 shadow-xl rounded-lg"><div class="flex items-center justify-center"><div class="text-center relative group"><div class="text-sm text-gray-500 mb-1">Overall Rating (Scaled to 100)</div><div class="flex items-center space-x-2 justify-center"><span class="font-bold text-5xl text-blue-600">${overallRawScoreText}</span><span class="text-3xl font-bold text-blue-600">/100</span>${infoIcon('This is the combined raw average score for the full assessment (Infrastructure and Operations) on a standardized 0-100 scale. It is calculated as (Infra Score + Ops Score) / 2.')}</div></div></div></div><div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6"><div class="bg-white p-4 rounded-lg text-center border shadow-md hover:shadow-lg transition-shadow"><h3 class="text-md font-semibold text-gray-700 mb-2 flex items-center justify-center">Infrastructure Capability (Max ${infraMaxScore})${infoIcon('This is the aggregated raw score from the Infrastructure Capabilities assessment (Max '+infraMaxScore+').')}</h3><span class="font-bold text-2xl text-indigo-600">${infraRawScoreText}</span></div><div class="bg-white p-4 rounded-lg text-center border shadow-md hover:shadow-lg transition-shadow"><h3 class="text-md font-semibold text-gray-700 mb-2 flex items-center justify-center">Operations Capability (Max ${opsMaxScore})${infoIcon('This is the aggregated raw score from the Operations and Process Capabilities assessment (Max '+opsMaxScore+').')}</h3><span class="font-bold text-2xl text-indigo-600">${opsRawScoreText}</span></div></div></div>${vcfWarningHtml}<div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div class="bg-white p-6 rounded-lg shadow-lg border"><h3 class="text-xl font-bold text-center text-gray-800 mb-4 flex items-center justify-center">Infrastructure Capability Breakdown${infoIcon('This chart shows the maturity score (1-5) for each component. The inner blue line is your current score, and the outer gray line is the benchmark (5).')}</h3><canvas id="infraRadarChart"></canvas></div><div class="bg-white p-6 rounded-lg shadow-lg border"><h3 class="text-xl font-bold text-center text-gray-800 mb-4 flex items-center justify-center">Operations Capability Breakdown${infoIcon('This chart shows the maturity score (1-5) for each component. The inner green line is your current score, and the outer gray line is the benchmark (5).')}</h3><canvas id="opsRadarChart"></canvas></div></div><div class="text-center p-4 mt-8 bg-blue-50 border border-blue-200 rounded-lg shadow-sm animate-fade-in"><p class="text-sm text-blue-800">These charts highlight your maturity gaps. A consolidated set of calls to action, along with supporting video materials, is available below.</p><i class="fa-solid fa-angles-down mt-2 text-blue-500 animate-bounce"></i></div><div><div class="text-center mb-6"><h2 class="text-3xl font-bold text-gray-800 inline-flex items-center justify-center">Your Ranked Priorities${infoIcon('This section reflects the priorities you set in the "Priority Use Cases" drag-and-drop assessment.')}</h2></div><div class="text-left mx-auto max-w-2xl mb-6 p-6 bg-white shadow-md rounded-lg border"><h3 class="text-xl font-bold text-center text-gray-800 mb-4">Your Ranked Use Cases</h3>${useCasesSummaryListHtml}</div><div class="text-left mx-auto max-w-2xl mb-6 p-6 bg-white shadow-md rounded-lg border"><h3 class="text-xl font-bold text-center text-gray-800 mb-4">Your Ranked Capabilities</h3>${capabilitiesSummaryListHtml}</div></div><div><div class="text-center mb-6"><h2 class="text-3xl font-bold text-gray-800 inline-flex items-center justify-center">Insights & Recommendations${infoIcon('This section provides dynamically generated advice, actionable steps, and video resources based on your assessment results.')}</h2></div><div class="summary-text p-6 bg-gray-50 rounded-lg border space-y-4">${insightsHtml}</div></div><div class="mt-12 text-center"><button id="finish-journey-btn" class="group bg-green-600 text-white px-8 py-4 font-bold rounded-md hover:bg-green-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl text-lg">Finish Journey & Return Home <i class="fa-solid fa-flag-checkered ml-2"></i></button></div></div>`;
+            dom.mainContent.innerHTML = summaryHtml;
+
+            // Chart Rendering
+            const radarChartOptions = { responsive: true, maintainAspectRatio: true, scales: { r: { angleLines: { color: 'rgba(0, 0, 0, 0.1)' }, grid: { color: 'rgba(0, 0, 0, 0.1)' }, min: 1, max: 5, beginAtZero: false, ticks: { stepSize: 1, callback: value => ['N/A', 'Unplanned (1)', 'Scheduled (2)', 'Ongoing (3)', 'Implemented (4)', 'Max (5)'][value], backdropColor: 'rgba(255, 255, 255, 0.75)', color: '#4b5563' }, pointLabels: { font: { size: 12 }, color: '#1f2937', padding: 5 } } }, plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: context => `${context.dataset.label || ''}: ${context.parsed.r.toFixed(1)}/5` } } } };
+            const infraCtx = document.getElementById('infraRadarChart');
+            if (infraCtx && infraChartLabels.length > 0) new Chart(infraCtx, { type: 'radar', data: { labels: infraChartLabels, datasets: [{ label: 'Current Maturity', data: infraChartData, backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: 'rgba(59, 130, 246, 1)', borderWidth: 2, pointBackgroundColor: 'rgba(59, 130, 246, 1)' }, { label: 'Benchmark', data: infraChartLabels.map(() => 5), backgroundColor: 'rgba(209, 213, 219, 0.2)', borderColor: 'rgba(107, 114, 128, 1)', borderWidth: 1, pointBackgroundColor: 'rgba(107, 114, 128, 1)' }] }, options: radarChartOptions });
+            const opsCtx = document.getElementById('opsRadarChart');
+            if (opsCtx && opsChartLabels.length > 0) new Chart(opsCtx, { type: 'radar', data: { labels: opsChartLabels, datasets: [{ label: 'Current Maturity', data: opsChartData, backgroundColor: 'rgba(22, 163, 74, 0.2)', borderColor: 'rgba(22, 163, 74, 1)', borderWidth: 2, pointBackgroundColor: 'rgba(22, 163, 74, 1)' }, { label: 'Benchmark', data: opsChartLabels.map(() => 5), backgroundColor: 'rgba(209, 213, 219, 0.2)', borderColor: 'rgba(107, 114, 128, 1)', borderWidth: 1, pointBackgroundColor: 'rgba(107, 114, 128, 1)' }] }, options: { ...radarChartOptions, scales: { r: { ...radarChartOptions.scales.r, pointLabels: { ...radarChartOptions.scales.r.pointLabels, font: { size: 14 } } } } } });
+            
+            dom.mainContent.querySelector('#finish-journey-btn').addEventListener('click', () => { state.appStatus = APP_STATUS.LANDING; renderApp(); });
+        };
+        
+        // --- END: Main Rendering Functions ---
+        
+        // --- START: Utility Function for VCF Status Warning ---
+        function generateVCFWarningBlock(choices) {
+            const infraData = assessmentData['Infrastructure Capabilities'];
+            const infraVCFOffCategories = [];
+            for (const category in infraData.categories) if (choices.vcfStatus[category] === false) infraVCFOffCategories.push(category);
+            
+            if (infraVCFOffCategories.length === 0) return ''; // Removed opsVCFOff check
+            
+            let warningHtml = `<div class="p-6 rounded-xl border-2 border-red-400 bg-red-100/70 shadow-2xl animate-scale-in my-12"><h4 class="text-2xl font-extrabold text-red-800 mb-4 flex items-center"><i class="fa-solid fa-skull-crossbones text-3xl text-red-600 mr-3 animate-pulse"></i>CRITICAL: VCF Strategic Disadvantage Detected</h4><p class="text-red-700 mb-4 leading-relaxed">Your current maturity is being significantly limited because a unified cloud foundation (like VCF) is not fully leveraged in several key domains. This results in operational siloing and an artificial **score penalty** in the relevant sections, demonstrating the cost of management complexity.</p><div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+            if (infraVCFOffCategories.length > 0) warningHtml += `<div class="p-4 bg-red-200/50 rounded-lg border border-red-300"><h5 class="font-bold text-red-800 mb-2 flex items-center"><i class="fa-solid fa-microchip mr-2"></i> Infrastructure Domains Disabled</h5><ul class="list-disc list-inside text-sm text-red-800 ml-4 space-y-1">${infraVCFOffCategories.map(cat => `<li><strong>${cat}:</strong> ${strategicGuidance[cat].substring(0, 100)}...</li>`).join('')}</ul></div>`;
+            // Removed opsVCFOff block
+            warningHtml += `</div><div class="text-right mt-4"><a href="#assessment-title" class="text-sm font-semibold text-red-600 hover:text-red-900 transition-colors">Review your VCF selections in the Assessment sections above &uarr;</a></div></div>`;
+            return warningHtml;
+        }
+        // --- END: Utility Function for VCF Status Warning ---
+
+        // --- START: Summary Insights Generator ---
+        function generateFinalInsights(data) {
+            const { infraCurrentScore, infraMaxScore, opsCurrentScore, opsMaxScore, choices } = data; let finalHtml = '';
+            const generateInsightFor = (title, assessmentKey, currentScore, maxScore) => {
+                let insightHtml = `<div class="p-4 rounded-lg border bg-white shadow-sm mb-6"><h4 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">${title} (Score: ${currentScore.toFixed(0)}/${maxScore})</h4>`;
+                const { normalized } = getNormalizedScoreAndStars(currentScore, maxScore);
+                if (normalized.toFixed(1) >= 4.9) insightHtml += `<div class="p-4 rounded-md flex items-start space-x-4 bg-green-50 border-green-200 border-l-4"><i class="fa-solid fa-crown text-xl text-green-600 mt-1"></i><div><h4 class="font-bold text-green-800">Excellent Maturity!</h4><p class="text-gray-700 text-sm">You have demonstrated a high level of maturity in this area. Your focus should be on maintaining this standard and exploring advanced capabilities like Private AI and multi-cloud federation to stay ahead.</p></div></div>`;
+                else {
+                    const assessmentConfig = assessmentData[assessmentKey]; const gaps = [], groupedGaps = {};
+                    if (assessmentConfig.categories) { for (const category in assessmentConfig.categories) { if (choices.optedOut[category]) continue; assessmentConfig.categories[category].forEach(stmt => { const status = choices.statements[`${category}-${stmt.statement}`] || 'unplanned'; if (status !== 'implemented') gaps.push({ ...stmt, category, status }); }); } gaps.reduce((acc, gap) => { if (!acc[gap.category]) acc[gap.category] = []; acc[gap.category].push(`${gap.statement.split(':')[0]} (${STATUS_MAP[gap.status]})`); return acc; }, groupedGaps); }
+                    if (assessmentKey === 'Operations and Process Capabilities') { 
+                        const opsGaps = assessmentData[assessmentKey].questions.filter(q => { 
+                            const choice = state.userChoices.peopleProcess[q.id] || 'unplanned'; 
+                            return choice === 'unplanned' || choice === 'scheduled'; 
+                        }); 
+                        opsGaps.forEach(q => { 
+                            const currentMaturity = state.userChoices.peopleProcess[q.id] || 'unplanned'; 
+                            const categoryName = q.readinessArea; 
+                            const requiredSteps = []; 
+                            if (currentMaturity === 'unplanned') requiredSteps.push(`Move to ${STATUS_MAP.scheduled}: ${q.levels.Scheduled.substring(0, 100)}...`); 
+                            if (currentMaturity === 'scheduled') requiredSteps.push(`Move to ${STATUS_MAP.ongoing}: ${q.levels.Ongoing.substring(0, 100)}...`); 
+                            if (requiredSteps.length > 0) { if (!groupedGaps[categoryName]) groupedGaps[categoryName] = []; groupedGaps[categoryName].push(...requiredSteps); } 
+                        }); 
+                    }
+                    const relevantCategories = Object.keys(groupedGaps);
+                    insightHtml += `<div class="mb-4"><h5 class="font-semibold text-gray-700 mb-2"><i class="fa-solid fa-stairs mr-2 text-blue-500"></i>Your Path to Improvement</h5><p class="text-sm text-gray-600 mb-3">To reach a higher level of maturity, focus on implementing capabilities in these key areas:</p><div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">${relevantCategories.map(category => `<div class="p-3 bg-gray-50 border border-gray-200 rounded-lg"><h6 class="font-bold text-gray-800">${category}</h6><ul class="list-disc list-inside text-sm text-gray-700 mt-1 space-y-1">${groupedGaps[category].map(statement => `<li>${statement}</li>`).join('')}</ul></div>`).join('')}</div></div>`;
+                    insightHtml += `<div class="mb-4"><h5 class="font-semibold text-gray-700 mb-2"><i class="fa-solid fa-rocket mr-2 text-purple-500"></i>VCF Accelerator: Resources to Help</h5><p class="text-sm text-gray-600 mb-3">VMware Cloud Foundation provides a unified platform. Review the material below for guidance on addressing your gaps:</p><ul class="text-sm text-gray-700 space-y-2">${relevantCategories.map(cat => { const video = youtubeLinks[cat]; return `<li class="p-3 bg-purple-50 rounded-md border border-purple-200"><div><strong class="text-purple-800">${cat}:</strong> ${strategicGuidance[cat]}</div>${video ? `<a href="${video.url}" target="_blank" rel="noopener noreferrer" class="flex items-start mt-3 p-3 bg-white rounded-md border hover:bg-gray-50 transition-colors duration-200 group"><i class="fa-brands fa-youtube text-red-500 text-3xl mr-3 mt-1"></i><div class="flex-grow"><p class="font-bold text-sm text-blue-700 group-hover:underline">${video.title}</p><p class="text-xs text-gray-500">${video.channel}</p></div><div class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full whitespace-nowrowrap">${video.length}</div></a>` : ''}</li>`; }).join('')}</ul></div>`;
+                    insightHtml += `<div><h5 class="font-semibold text-gray-700 mb-2"><i class="fa-solid fa-bullseye mr-2 text-green-500"></i>Strategic Takeaway</h5><p class="text-sm text-gray-600">By prioritizing the implementation of the missing components in the categories above and leveraging the integrated nature of VCF, you can significantly increase your operational efficiency and speed of innovation.</p></div>`;
+                } insightHtml += `</div>`; return insightHtml;
+            };
+            finalHtml += generateInsightFor('Infrastructure Capability Insights', 'Infrastructure Capabilities', infraCurrentScore, infraMaxScore);
+            finalHtml += generateInsightFor('Operations and Process Capability Insights', 'Operations and Process Capabilities', opsCurrentScore, opsMaxScore);
+            if ((choices.surveyB['q2'] || []).length > 2) finalHtml += `<div class="p-4 rounded-md flex items-start space-x-4 bg-yellow-50 border-yellow-200 border-l-4 mt-6"><i class="fa-solid fa-triangle-exclamation text-xl text-yellow-600 mt-1"></i><div><h4 class="font-bold text-yellow-800">General Insight: Multi-Cloud Complexity</h4><p class="text-gray-700 text-sm">Your use of multiple cloud providers suggests a high degree of management complexity. A unified platform like VCF, extended via Hybrid Cloud services, can mitigate these challenges by providing consistent operations across your private and public environments.</p></div></div>`;
+            return finalHtml;
+        }
+        // --- END: Summary Insights Generator ---
+        
+        // --- START: Cloud Strategy Survey (Multi-Question) ---
+        const renderCloudStrategySurvey = () => {
+            const data = assessmentData[state.currentAssessmentKey]; dom.assessmentTitle.textContent = data.title; renderGuidancePanel(state.currentAssessmentKey);
+            const questionKeys = Object.keys(data.questions), questionKey = questionKeys[state.currentSurveyQuestionIndex], questionData = data.questions[questionKey];
+            const progress = ((state.currentSurveyQuestionIndex + 1) / questionKeys.length) * 100;
+            let optionsHtml = '';
+            if (questionData.type === 'checkbox' || questionData.type === 'radio') { optionsHtml = '<div class="space-y-4">'; questionData.options.forEach(option => { const isChecked = (state.userChoices.surveyB[questionKey] || []).includes(option); optionsHtml += `<label class="flex items-center p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition-all duration-200 cursor-pointer"><input type="${questionData.type}" name="surveyOption" value="${option}" class="h-5 w-5 ${questionData.type === 'radio' ? 'rounded-full' : 'rounded'} text-blue-600 border-gray-300 focus:ring-blue-500" ${isChecked ? 'checked' : ''}><span class="ml-4 text-gray-800 font-medium">${option}</span></label>`; }); optionsHtml += '</div>'; }
+            else if (questionData.type === 'workload-matrix') { optionsHtml = '<div class="overflow-x-auto"><table class="w-full min-w-[600px] border-collapse">'; optionsHtml += `<thead><tr class="bg-gray-100"><th class="p-3 text-left font-semibold text-gray-700 rounded-tl-lg">Workload</th>`; questionData.statuses.forEach(status => optionsHtml += `<th class="p-3 text-center font-semibold text-gray-700">${status}</th>`); optionsHtml += `</tr></thead><tbody>`; questionData.workloads.forEach((workload, wIndex) => { const currentStatus = state.userChoices.surveyB[questionKey]?.[workload] || 'No'; optionsHtml += `<tr class="border-b border-gray-200 ${wIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors"><td class="p-4 text-gray-800 font-medium">${workload}</td>`; questionData.statuses.forEach(status => { const isChecked = (currentStatus === status); optionsHtml += `<td class="p-4 text-center"><input type="radio" name="workload_${wIndex}" value="${status}" data-workload="${workload}" class="h-5 w-5 text-blue-600 border-gray-300 focus:ring-blue-500" ${isChecked ? 'checked' : ''}></td>`; }); optionsHtml += `</tr>`; }); optionsHtml += '</tbody></table></div>'; }
+            dom.mainContent.innerHTML = `<div class="animate-fade-in"><div class="mb-8"><div class="text-sm font-medium text-gray-600 mb-2">Progress (${state.currentSurveyQuestionIndex + 1} of ${questionKeys.length})</div><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-blue-600 h-2.5 rounded-full transition-all duration-500" style="width: ${progress}%"></div></div></div><div class="bg-white p-8 rounded-lg shadow-xl border border-gray-100"><div class="flex items-start space-x-4 mb-6"><div class="flex-shrink-0 w-12 h-12 bg-blue-100 text-blue-600 flex items-center justify-center rounded-lg"><i class="${questionData.icon} text-2xl"></i></div><h2 class="2xl font-bold text-gray-800">${questionData.title}</h2></div><div class="mt-6">${optionsHtml}</div></div><div class="flex justify-between items-center mt-8"><button id="prev-question-btn" class="px-6 py-3 bg-gray-200 text-gray-700 font-medium rounded-md hover:bg-gray-300 transition-colors ${state.currentSurveyQuestionIndex === 0 ? 'opacity-50 cursor-not-allowed' : ''}" ${state.currentSurveyQuestionIndex === 0 ? 'disabled' : ''}><i class="fa-solid fa-arrow-left mr-2"></i> Previous</button><button id="next-question-btn" class="px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors transform hover:scale-[1.02]">${state.currentSurveyQuestionIndex === questionKeys.length - 1 ? 'Next Step <i class="fa-solid fa-arrow-right ml-2"></i>' : 'Next <i class="fa-solid fa-arrow-right ml-2"></i>'}</button></div></div>`;
+            document.getElementById('prev-question-btn').addEventListener('click', () => { if (state.currentSurveyQuestionIndex > 0) { state.currentSurveyQuestionIndex--; renderCloudStrategySurvey(); } });
+            document.getElementById('next-question-btn').addEventListener('click', () => { saveSurveyBData(questionKey, questionData.type); if (state.currentSurveyQuestionIndex < questionKeys.length - 1) { state.currentSurveyQuestionIndex++; renderCloudStrategySurvey(); } else { const currentJourneyIndex = assessmentJourney.indexOf(state.currentAssessmentKey); if (currentJourneyIndex < assessmentJourney.length - 1) { const nextAssessmentKey = assessmentJourney[currentJourneyIndex + 1], nextData = assessmentData[nextAssessmentKey]; state.currentAssessmentKey = nextAssessmentKey; state.appStatus = nextData.questions && !nextData.isScored ? APP_STATUS.SURVEY_STRATEGY : (nextData.useCaseCategories ? APP_STATUS.USE_CASES : (nextData.questions && nextData.isScored ? APP_STATUS.SURVEY_OPS : APP_STATUS.ASSESSMENT_INFRA)); state.currentSurveyQuestionIndex = 0; renderApp(); } else { state.appStatus = APP_STATUS.SUMMARY; renderApp(); } } });
+            if (questionData.type === 'checkbox' || questionData.type === 'radio') { dom.mainContent.querySelectorAll('input[name="surveyOption"]').forEach(input => input.addEventListener('change', () => saveSurveyBData(questionKey, questionData.type))); }
+            else if (questionData.type === 'workload-matrix') { dom.mainContent.querySelectorAll('input[type="radio"]').forEach(input => input.addEventListener('change', (e) => { const workload = e.target.dataset.workload, status = e.target.value; if (!state.userChoices.surveyB[questionKey]) state.userChoices.surveyB[questionKey] = {}; state.userChoices.surveyB[questionKey][workload] = status; })); } // Removed saveUserData()
+        };
+
+        const saveSurveyBData = (questionKey, type) => {
+            if (type === 'checkbox') { const selectedOptions = Array.from(dom.mainContent.querySelectorAll('input[name="surveyOption"]:checked')).map(cb => cb.value); state.userChoices.surveyB[questionKey] = selectedOptions; }
+            else if (type === 'radio') { const selectedOption = dom.mainContent.querySelector('input[name="surveyOption"]:checked'); state.userChoices.surveyB[questionKey] = selectedOption ? [selectedOption.value] : []; }
+            // No saveUserData() call needed
+        };
+        // --- END: Cloud Strategy Survey ---
+        
+        // --- START: Main Application Entry Point ---
+        window.onload = () => {
+            // Map DOM elements
+            dom.mainContent = document.getElementById('main-content');
+            dom.assessmentTitle = document.getElementById('assessment-title');
+            dom.scoreDisplay = document.getElementById('score-display');
+            // dom.userIdDisplay = document.getElementById('user-id-display'); // Removed
+            dom.goBackButton = document.getElementById('go-back-btn');
+            dom.loadingScreen = document.getElementById('loading-screen');
+            dom.guidancePanel = document.getElementById('guidance-panel');
+
+            // Remove User ID display if it exists (might not be needed if element removed from HTML)
+            const userIdDisp = document.getElementById('user-id-display');
+            if(userIdDisp) userIdDisp.remove();
+
+            // Directly render the app with default state
+            renderApp();
+
+            // Keep the "Go Back" button logic
+            dom.goBackButton.addEventListener('click', () => {
+                const currentIndex = assessmentJourney.indexOf(state.currentAssessmentKey);
+                if (state.appStatus === APP_STATUS.SUMMARY) { state.currentAssessmentKey = assessmentJourney[assessmentJourney.length - 1]; const prevData = assessmentData[state.currentAssessmentKey]; state.appStatus = prevData.questions && !prevData.isScored ? APP_STATUS.SURVEY_STRATEGY : (prevData.useCaseCategories ? APP_STATUS.USE_CASES : (prevData.questions && prevData.isScored ? APP_STATUS.SURVEY_OPS : APP_STATUS.ASSESSMENT_INFRA)); }
+                else if (currentIndex > 0) { state.currentAssessmentKey = assessmentJourney[currentIndex - 1]; const prevData = assessmentData[state.currentAssessmentKey]; const prevAppStatus = prevData.questions && !prevData.isScored ? APP_STATUS.SURVEY_STRATEGY : (prevData.useCaseCategories ? APP_STATUS.USE_CASES : (prevData.questions && prevData.isScored ? APP_STATUS.SURVEY_OPS : APP_STATUS.ASSESSMENT_INFRA)); if (prevAppStatus === APP_STATUS.SURVEY_STRATEGY) state.currentSurveyQuestionIndex = 0; state.appStatus = prevAppStatus; }
+                else state.appStatus = APP_STATUS.LANDING;
+                renderApp();
+            });
+        };
+        // --- END: Main Application Entry Point ---
+
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; color: #374151; }
+        .container-grid { max-width: 1400px; display: grid; grid-template-columns: 1fr; gap: 2rem; }
+        @media (min-width: 1024px) { .container-grid { grid-template-columns: 2fr 1fr; } }
+        .dot { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .segmented-control > button { border-right: 1px solid #d1d5db; }
+        .segmented-control > button:last-child { border-right: none; }
+        .sortable-ghost { opacity: 0.5; background: #c8ebfb; border: 2px dashed #3b82f6; box-shadow: none; transform: scale(1.02); }
+        .category-drag-handle, .item-drag-handle { cursor: grab; }
+        .category-drag-handle:active, .item-drag-handle:active { cursor: grabbing; }
+        ol.list-alpha { list-style-type: lower-alpha; }
+        /* Style for hidden radio inputs and their labels */
+        .maturity-radio + label { transition: all 0.2s ease-in-out; opacity: 0.7; }
+        .maturity-radio:checked + label { transform: scale(1.1); opacity: 1; }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+    <div id="loading-screen" class="fixed inset-0 bg-white flex items-center justify-center z-50 transition-opacity duration-500">
+        <div class="text-center animate-fade-in">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 mb-6 rounded-full shadow-lg animate-spin">
+                <i class="fa-solid fa-cog text-white text-3xl"></i>
+            </div>
+            <div class="text-xl text-gray-700 font-semibold">Loading Assessment Tool...</div>
+            <div class="text-sm text-gray-500 mt-2">Preparing your capability evaluation</div>
+        </div>
+    </div>
+    
+    <div class="container-grid mx-auto">
+        <div class="bg-white/95 backdrop-blur-sm p-6 md:p-10 shadow-2xl border border-white/20 rounded-xl">
+            <div classs="flex flex-col sm:flex-row justify-between items-center mb-8 space-y-4 sm:space-y-0">
+                <button id="go-back-btn" class="group bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 px-6 py-3 font-medium rounded-lg hover:from-gray-200 hover:to-gray-300 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl w-full sm:w-auto">
+                    <i class="fa-solid fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform duration-300"></i>
+                    Go Back
+                </button>
+                </div>
+
+            <h1 id="assessment-title" class="text-4xl sm:text-5xl font-extrabold text-center mb-12 bg-clip-text text-transparent bg-gradient-to-r from-gray-700 to-gray-900"></h1>
+
+            <div id="score-display" class="hidden"></div>
+            <div id="main-content"></div>
+        </div>
+        
+        <div id="guidance-panel" class="bg-white/95 backdrop-blur-sm p-6 md:p-10 shadow-2xl border border-white/20 rounded-xl md:sticky md:top-8 self-start"></div>
+    </div>
+
+    </body>
+</html>

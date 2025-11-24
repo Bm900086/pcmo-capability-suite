@@ -3,7 +3,7 @@ import { TrendingUp, Calculator, BarChart3, Gauge, CheckCircle2, ArrowRight } fr
 import { usePCMO } from '../PCMOContext'
 
 const Dashboard = () => {
-  const { pastValue, valueModel, competitive, maturity, readiness } = usePCMO()
+  const { pastValue, valueModel, competitive, maturity, readiness, globalConfig } = usePCMO()
   
   // Calculate values from context data
   const calculatePastValueSavings = () => {
@@ -78,7 +78,7 @@ const Dashboard = () => {
       vcfCost: ((valueModel.vcf.hardwareCost || 0) + (valueModel.vcf.licensingCost || 0) + (valueModel.vcf.operationalCost || 0)) || 1850000,
       baselineCost: ((valueModel.baseline.hardwareCost || 0) + (valueModel.baseline.licensingCost || 0) + (valueModel.baseline.operationalCost || 0)) || 5050000,
       roi: calculateValueModelROI() || 73.0,
-      totalVMs: valueModel.totalVMs || 450
+      totalVMs: globalConfig?.totalVMs || 0
     },
     competitive: {
       vcfCost: competitive.vcf.totalCost || 1850000,
@@ -164,7 +164,7 @@ const Dashboard = () => {
   ]
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Executive Dashboard</h1>
         <p className="text-gray-600">Overview of PCMO Capability Suite metrics and insights</p>

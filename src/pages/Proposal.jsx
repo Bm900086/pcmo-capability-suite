@@ -1,6 +1,8 @@
 import { usePCMO } from '../PCMOContext'
 import { Printer, FileText } from 'lucide-react'
 import { useState } from 'react'
+import BusinessGuide from '../components/BusinessGuide'
+import DisclaimerFooter from '../components/DisclaimerFooter'
 
 const Proposal = () => {
   const { pastValue, valueModel, competitive, maturity, readiness } = usePCMO()
@@ -172,6 +174,16 @@ const Proposal = () => {
   }
   
   return (
+    <div className="pb-24">
+      {/* Business Guide */}
+      <div className="print:hidden mb-8">
+        <BusinessGuide
+          context="The Proposal Generation module consolidates all assessment results into a professional, print-ready document suitable for executive presentation and stakeholder review. It includes dynamic executive summaries, comprehensive financial impact analysis, maturity scores, readiness status, and strategic recommendations based on your completed assessments across all modules."
+          action="Review the generated proposal below. The document automatically includes all data from your completed assessments. Use the 'Print / Save as PDF' button to generate a professional document. Customize the 'Prepared For' field and upload customer logos for branding. The proposal is optimized for printing with proper page breaks and formatting."
+          assumptions="The proposal aggregates data from Past Value Analysis (realized value), Value Model (TCO/ROI projections), Competitive TCO (market comparisons), Maturity Assessment (capability scores), and Readiness Assessment (deployment readiness). Financial metrics are calculated based on your inputs and industry-standard assumptions. Recommendations are dynamically generated based on identified gaps, maturity scores, and readiness blockers."
+        />
+      </div>
+      
     <>
       {/* Floating Print Button */}
       <div className="print:hidden fixed bottom-8 right-8 z-50">
@@ -212,7 +224,8 @@ const Proposal = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b-2 border-gray-300 pb-2">
               Financial Impact
             </h2>
-            <div className="overflow-x-auto">
+            {/* Desktop: Table View */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full border-collapse border border-gray-300">
                 <thead>
                   <tr className="bg-gray-100">
@@ -242,6 +255,55 @@ const Proposal = () => {
                   </tr>
                 </tbody>
               </table>
+            </div>
+            
+            {/* Mobile: Card View */}
+            <div className="md:hidden space-y-4">
+              <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                <div className="font-semibold text-gray-900 mb-3 text-base border-b border-gray-200 pb-2">Annual Spend</div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Current Spend:</span>
+                    <span className="font-medium text-gray-900">{formatCurrency(currentSpend)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Future Spend (VCF):</span>
+                    <span className="font-medium text-gray-900">{formatCurrency(futureSpend)}</span>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t border-gray-200">
+                    <span className="text-gray-700 font-medium">Difference:</span>
+                    <span className="font-semibold text-green-700">{formatCurrency(currentSpend - futureSpend)}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm">
+                <div className="font-semibold text-gray-900 mb-3 text-base border-b border-gray-200 pb-2">{valueModel.timeframe || 3}-Year TCO</div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Current:</span>
+                    <span className="font-medium text-gray-900">{formatCurrency(tco.current)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Future (VCF):</span>
+                    <span className="font-medium text-gray-900">{formatCurrency(tco.future)}</span>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t border-gray-200">
+                    <span className="text-gray-700 font-medium">Savings:</span>
+                    <span className="font-semibold text-green-700">{formatCurrency(tco.savings)}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-indigo-50 border-2 border-indigo-200 rounded-lg p-4 shadow-sm">
+                <div className="font-semibold text-gray-900 mb-3 text-base border-b border-indigo-300 pb-2">Total Savings</div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between pt-2">
+                    <span className="text-gray-900 font-semibold">3-Year ROI:</span>
+                    <span className="font-bold text-indigo-700 text-base">{roi.toFixed(1)}%</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
           
@@ -300,7 +362,13 @@ const Proposal = () => {
           </div>
         </div>
       </div>
+      
+      {/* Disclaimer Footer */}
+      <div className="print:hidden">
+        <DisclaimerFooter />
+      </div>
     </>
+    </div>
   )
 }
 

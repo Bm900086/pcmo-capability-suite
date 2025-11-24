@@ -1,6 +1,13 @@
 # PCMO Capability Suite
 
+**Version:** v2.0.0  
+**Last Updated:** 2024-11-24
+
 **Private Cloud Maturity & Optimization Capability Suite** - A comprehensive React application for assessing and optimizing private cloud infrastructure.
+
+> 📚 **New to the project?** Start with [START_HERE.md](./START_HERE.md)  
+> 🔄 **Need to rollback?** See [BACKUP_AND_ROLLBACK.md](./BACKUP_AND_ROLLBACK.md)  
+> 📖 **Complete Documentation:** See [DOCUMENTATION_INDEX.md](./DOCUMENTATION_INDEX.md)
 
 ## Overview
 
@@ -127,7 +134,29 @@ npm run preview
 
 ## Documentation
 
-See [BUILD_LOG.md](./BUILD_LOG.md) for detailed implementation documentation and development history.
+### 📚 Complete Documentation Index
+- **[DOCUMENTATION_INDEX.md](./DOCUMENTATION_INDEX.md)** - Complete documentation index and navigation
+
+### 🚀 Getting Started
+- **[START_HERE.md](./START_HERE.md)** - Quick start guide (especially for RAG chatbot)
+- **[HOW_TO_START_BACKEND.md](./HOW_TO_START_BACKEND.md)** - Backend startup guide
+
+### 📖 Version Control & Rollback
+- **[VERSION_HISTORY.md](./VERSION_HISTORY.md)** - Complete version history and changelog
+- **[CHANGELOG.md](./CHANGELOG.md)** - Detailed changelog by version
+- **[BACKUP_AND_ROLLBACK.md](./BACKUP_AND_ROLLBACK.md)** - Backup and rollback procedures
+
+### 🔧 Setup & Configuration
+- **[rag_service/README_LOCAL.md](./rag_service/README_LOCAL.md)** - RAG backend setup guide
+- **[rag_service/SETUP_CHECKLIST.md](./rag_service/SETUP_CHECKLIST.md)** - Setup verification checklist
+
+### 📊 Project Details
+- **[PROJECT_DOCUMENTATION.md](./PROJECT_DOCUMENTATION.md)** - Complete project documentation
+- **[BUILD_LOG.md](./BUILD_LOG.md)** - Detailed implementation documentation and development history
+
+### Current Version
+- **Version:** v2.0.0 (see [VERSION.txt](./VERSION.txt))
+- **Last Updated:** 2024-11-24
 
 ## License
 
