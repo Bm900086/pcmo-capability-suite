@@ -1,4 +1,4 @@
-import { X, Building2, Hash, Users, MapPin, Tag, Globe, Briefcase, CheckCircle2, XCircle } from 'lucide-react'
+import { X, Building2, Hash, Users, MapPin, Tag, Globe, Briefcase, CheckCircle2, XCircle, Factory } from 'lucide-react'
 
 const CustomerDetailsCard = ({ customer, onClose }) => {
   if (!customer) return null
@@ -6,6 +6,7 @@ const CustomerDetailsCard = ({ customer, onClose }) => {
   const fieldConfig = [
     { key: 'customerName', label: 'Customer Name', icon: Building2 },
     { key: 'erpAccountNumber', label: 'ERP Account Number', icon: Hash },
+    { key: 'industryType', label: 'Industry Type', icon: Factory },
     { key: 'parentId', label: 'Parent ID', icon: Users },
     { key: 'parentName', label: 'Parent Name', icon: Users },
     { key: 'salesOrg', label: 'Sales Org', icon: Briefcase },

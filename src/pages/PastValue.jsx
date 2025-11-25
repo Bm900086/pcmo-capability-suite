@@ -296,7 +296,7 @@ const PastValue = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <div className="flex items-center space-x-2">
                     <span>Analysis Term</span>
-                    <Tooltip text="Select the number of years to analyze (3 or 5 years)">
+                    <Tooltip text="Select the number of years to analyze (3, 5, 7, or 10 years)">
                       <HelpCircle className="w-4 h-4 text-gray-400" />
                     </Tooltip>
                   </div>
@@ -308,6 +308,8 @@ const PastValue = () => {
                 >
                   <option value={3}>3 Years</option>
                   <option value={5}>5 Years</option>
+                  <option value={7}>7 Years</option>
+                  <option value={10}>10 Years</option>
                 </select>
               </div>
               

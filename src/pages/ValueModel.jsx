@@ -15,7 +15,7 @@ const ValueModel = () => {
   const { valueModel, updateValueModel, globalConfig } = usePCMO()
   
   // Get values from global config (shared across all models)
-  const analysisTerm = globalConfig?.analysisTerm || 3
+  const analysisTerm = globalConfig?.analysisTerm || 5
   const totalVMs = globalConfig?.totalVMs || 0
   const totalHosts = globalConfig?.totalHosts || 0
   const selectedCustomer = globalConfig?.selectedCustomer

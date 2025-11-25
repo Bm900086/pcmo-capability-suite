@@ -64,6 +64,25 @@ const countriesByRegion = {
   ]
 }
 
+// Industry Types
+const industryTypes = [
+  'Technology',
+  'Financial Services',
+  'Healthcare',
+  'Manufacturing',
+  'Retail',
+  'Telecommunications',
+  'Energy & Utilities',
+  'Government',
+  'Education',
+  'Media & Entertainment',
+  'Transportation & Logistics',
+  'Professional Services',
+  'Hospitality',
+  'Pharmaceuticals',
+  'Insurance'
+]
+
 // Company name templates
 const companyNameTemplates = [
   'Tech', 'Solutions', 'Systems', 'Services', 'Enterprises', 'Group', 'Corporation', 'Industries',
@@ -110,6 +129,9 @@ export const generateCustomers = (count = 75) => {
     const countries = countriesByRegion[region]
     const country = countries[Math.floor(Math.random() * countries.length)]
     
+    // Select industry type
+    const industryType = industryTypes[Math.floor(Math.random() * industryTypes.length)]
+    
     // Generate unique company name
     let companyName = generateCompanyName()
     let attempts = 0
@@ -132,6 +154,7 @@ export const generateCustomers = (count = 75) => {
     const customer = {
       customerName: companyName,
       erpAccountNumber: erpAccount,
+      industryType: industryType,
       parentId: parent.id,
       parentName: parent.name,
       classification: classification,

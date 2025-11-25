@@ -233,6 +233,9 @@ const CustomerSelectionModal = ({ isOpen, onClose, onSelect }) => {
                             ERP Account
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            Industry Type
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                             Parent Name
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -254,6 +257,9 @@ const CustomerSelectionModal = ({ isOpen, onClose, onSelect }) => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                               {customer.erpAccountNumber}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                              {customer.industryType}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                               {customer.parentName}
@@ -289,6 +295,10 @@ const CustomerSelectionModal = ({ isOpen, onClose, onSelect }) => {
                               <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Region</div>
                               <div className="text-sm text-gray-700">{customer.region}</div>
                             </div>
+                          </div>
+                          <div className="pt-2 border-t border-gray-100">
+                            <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Industry Type</div>
+                            <div className="text-sm text-gray-700">{customer.industryType}</div>
                           </div>
                           <div className="pt-2 border-t border-gray-100">
                             <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Parent Name</div>

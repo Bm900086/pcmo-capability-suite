@@ -14,7 +14,7 @@ export const PCMOProvider = ({ children }) => {
   // Global Configuration State (Shared across all models)
   const [globalConfig, setGlobalConfig] = useState({
     selectedCustomer: null,
-    analysisTerm: 3,
+    analysisTerm: 5,
     totalVMs: 0,
     totalHosts: 0
   })
@@ -45,7 +45,7 @@ export const PCMOProvider = ({ children }) => {
     savings: [],
     // New fields
     pastStateSolution: 'VVF', // VVF, VVF w/ vSAN, VCF
-    analysisTerm: 3, // 3 or 5 years
+    analysisTerm: 5, // 3, 5, 7, or 10 years
     vmCountPast: 0,
     hostCountPast: 0,
     avgStoragePerVM: 0, // GB
@@ -79,7 +79,7 @@ export const PCMOProvider = ({ children }) => {
     customerName: 'HCLTech', // Dynamic customer name
     customerErpAccount: null, // ERP Account Number for selected customer
     selectedCustomer: null, // Full customer object for details card
-    analysisTerm: 3, // 3 years
+    analysisTerm: 5, // 3, 5, 7, or 10 years (default: 5)
     totalVMs: 0,
     totalHosts: 0,
     

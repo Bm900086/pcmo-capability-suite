@@ -16,7 +16,7 @@ const GlobalConfiguration = () => {
   const [isExpanded, setIsExpanded] = useState(true)
   
   // Local state - sync with context
-  const [analysisTerm, setAnalysisTerm] = useState(globalConfig?.analysisTerm || 3)
+  const [analysisTerm, setAnalysisTerm] = useState(globalConfig?.analysisTerm || 5)
   const [totalVMs, setTotalVMs] = useState(globalConfig?.totalVMs || 0)
   const [totalHosts, setTotalHosts] = useState(globalConfig?.totalHosts || 0)
   const [selectedCustomer, setSelectedCustomer] = useState(globalConfig?.selectedCustomer || null)
@@ -38,12 +38,12 @@ const GlobalConfiguration = () => {
     // Load previous analysis values for this customer if they exist
     const history = customerAnalysisHistory?.[customer.erpAccountNumber]
     if (history) {
-      setAnalysisTerm(history.analysisTerm || 3)
+      setAnalysisTerm(history.analysisTerm || 5)
       setTotalVMs(history.totalVMs || 0)
       setTotalHosts(history.totalHosts || 0)
     } else {
       // Reset to defaults if no history
-      setAnalysisTerm(3)
+      setAnalysisTerm(5)
       setTotalVMs(0)
       setTotalHosts(0)
     }
@@ -65,7 +65,7 @@ const GlobalConfiguration = () => {
   
   // Save to history when customer is selected and values are entered
   useEffect(() => {
-    if (selectedCustomer && (analysisTerm !== 3 || totalVMs > 0 || totalHosts > 0)) {
+    if (selectedCustomer && (analysisTerm !== 5 || totalVMs > 0 || totalHosts > 0)) {
       const history = {
         erpAccountNumber: selectedCustomer.erpAccountNumber,
         customerName: selectedCustomer.customerName,
@@ -82,7 +82,7 @@ const GlobalConfiguration = () => {
   // Clear customer selection
   const handleClearCustomer = () => {
     setSelectedCustomer(null)
-    setAnalysisTerm(3)
+    setAnalysisTerm(5)
     setTotalVMs(0)
     setTotalHosts(0)
   }
@@ -144,7 +144,7 @@ const GlobalConfiguration = () => {
                   )}
                 </div>
                 <p className="text-xs md:text-sm text-indigo-100 mt-1 break-words">
-                  {selectedCustomer.region} • {selectedCustomer.classification} • {selectedCustomer.parentName}
+                  {selectedCustomer.industryType} • {selectedCustomer.region} • {selectedCustomer.classification}
                 </p>
               </div>
             </div>
@@ -189,6 +189,8 @@ const GlobalConfiguration = () => {
               >
                 <option value={3}>3 Years</option>
                 <option value={5}>5 Years</option>
+                <option value={7}>7 Years</option>
+                <option value={10}>10 Years</option>
               </select>
             </div>
             
