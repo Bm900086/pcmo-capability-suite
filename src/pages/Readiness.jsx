@@ -441,15 +441,19 @@ const Readiness = () => {
   const score = calculateScore()
   const summary = generateReadinessSummary()
   const answeredCount = Object.keys(questionnaireState).length
+  
+  // Minimal, robust change: base final "Ready" label on numeric score to avoid boolean drift.
+  const isEffectively100 = Math.round(score) >= 100
+  
   let status = 'not-ready'
   let statusColor = 'red'
   let statusLabel = 'Not Ready'
   let statusIcon = XCircle
 
-  if (answeredCount >= 9) {
+  if (isEffectively100) {
     status = 'ready'
     statusColor = 'green'
-    statusLabel = 'Ready for Upgrade'
+    statusLabel = 'Ready'
     statusIcon = CheckCircle
   } else if (answeredCount >= 6) {
     status = 'warning'
