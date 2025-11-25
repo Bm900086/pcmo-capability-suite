@@ -1,6 +1,9 @@
 /**
  * Readiness Component Tests
  * Tests for readiness label consistency with score
+ * 
+ * Note: These are unit tests for the label logic, not full component tests.
+ * Full component tests would require React Testing Library setup.
  */
 
 import { describe, test, expect } from 'vitest'
