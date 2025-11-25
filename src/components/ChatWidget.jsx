@@ -15,7 +15,7 @@ const ChatWidget = () => {
     {
       role: 'assistant',
       content: 'Hello! I\'m your VCF 9.0 documentation assistant. Ask me anything about VMware Cloud Foundation 9.0, and I\'ll search through the documentation to help you.',
-      timestamp: new Date()
+      timestamp: new Date().toISOString()
     }
   ])
   const [input, setInput] = useState('')
@@ -45,7 +45,7 @@ const ChatWidget = () => {
     const userMessage = {
       role: 'user',
       content: input.trim(),
-      timestamp: new Date()
+      timestamp: new Date().toISOString()
     }
 
     setMessages(prev => [...prev, userMessage])
@@ -71,7 +71,7 @@ const ChatWidget = () => {
         role: 'assistant',
         content: data.answer,
         sources: data.sources || [],
-        timestamp: new Date()
+        timestamp: new Date().toISOString()
       }
 
       setMessages(prev => [...prev, assistantMessage])
@@ -112,7 +112,7 @@ Please check:
       const errorMsg = {
         role: 'assistant',
         content: errorMessage,
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
         isError: true
       }
       setMessages(prev => [...prev, errorMsg])
@@ -133,7 +133,7 @@ Please check:
       {
         role: 'assistant',
         content: 'Hello! I\'m your VCF 9.0 documentation assistant. Ask me anything about VMware Cloud Foundation 9.0, and I\'ll search through the documentation to help you.',
-        timestamp: new Date()
+        timestamp: new Date().toISOString()
       }
     ])
   }
@@ -210,7 +210,7 @@ Please check:
                     </div>
                   )}
                   <p className="text-xs mt-2 opacity-70">
-                    {message.timestamp.toLocaleTimeString()}
+                    {new Date(message.timestamp).toLocaleTimeString()}
                   </p>
                 </div>
               </div>

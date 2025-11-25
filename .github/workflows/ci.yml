@@ -19,6 +19,11 @@ jobs:
         node-version: '18'
         cache: 'npm'
     
+    - name: Validate package-lock.json sync
+      run: |
+        npm install --package-lock-only
+        git diff --exit-code package-lock.json || (echo "❌ package-lock.json is out of sync with package.json" && exit 1)
+    
     - name: Install dependencies
       run: npm ci
     
