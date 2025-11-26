@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useCallback } from 'react'
 
 const PCMOContext = createContext()
 
@@ -22,10 +22,15 @@ export const PCMOProvider = ({ children }) => {
   // Customer Analysis History (Stores previous analysis values per customer)
   const [customerAnalysisHistory, setCustomerAnalysisHistory] = useState({})
   
-  // Update Global Configuration
-  const updateGlobalConfig = (updates) => {
-    setGlobalConfig(prev => ({ ...prev, ...updates }))
-  }
+  // Update Global Configuration (memoized to prevent infinite loops)
+  const updateGlobalConfig = useCallback((updates) => {
+    setGlobalConfig(prev => {
+      // Only update if there are actual changes
+      const hasChanges = Object.keys(updates).some(key => prev[key] !== updates[key])
+      if (!hasChanges) return prev
+      return { ...prev, ...updates }
+    })
+  }, [])
   
   // Update Customer Analysis History
   const updateCustomerAnalysisHistory = (erpAccountNumber, history) => {

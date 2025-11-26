@@ -1,0 +1,6 @@
+# Place RVTools Excel files here
+# 
+# Expected files:
+# - RVToolsExport_*.xlsx
+# - Files should contain vInfo, vHost, and vMetaData worksheets
+
